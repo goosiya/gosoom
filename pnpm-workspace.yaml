@@ -1,0 +1,30 @@
+# pnpm 워크스페이스 — JS 앱과 공유 패키지만 포함
+# apps/api(FastAPI/Python)는 워크스페이스 외부(package.json 없음 → 자동 제외)
+packages:
+  - "apps/user-web"
+  - "apps/admin-web"
+  - "apps/mobile"
+  - "packages/*"
+
+# React 단일 해석 보장(AR2/G5) — Next 16과 Expo SDK 55 모두 React 19.2.0 사용
+# pnpm 11부터 overrides는 package.json이 아닌 이 파일에서 읽는다
+overrides:
+  react: "19.2.0"
+  react-dom: "19.2.0"
+  # @tanstack/react-query는 QueryClient가 모듈 싱글턴 → api-client·user-web가
+  # 중복 인스턴스를 가지면 Provider-훅 컨텍스트 불일치(런타임 오류). 단일 버전 강제(결정 #8)
+  "@tanstack/react-query": "5.101.0"
+
+# 신뢰할 수 있는 네이티브 빌드 스크립트 승인 (pnpm 11 빌드 격리 정책)
+# - unrs-resolver: eslint(oxc) 리졸버 네이티브 바이너리 → lint에 필요
+# - sharp: Next.js 이미지 최적화 네이티브 바이너리
+# - esbuild: vitest(api-client 단위 테스트)가 의존하는 번들러 네이티브 바이너리
+onlyBuiltDependencies:
+  - esbuild
+  - sharp
+  - unrs-resolver
+
+allowBuilds:
+  esbuild: true
+  sharp: true
+  unrs-resolver: true

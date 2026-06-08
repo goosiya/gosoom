@@ -1,0 +1,22 @@
+{
+  "name": "gosoom",
+  "version": "0.0.0",
+  "private": true,
+  "packageManager": "pnpm@11.5.2",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "build": "turbo build",
+    "dev": "turbo dev",
+    "lint": "turbo lint",
+    "typecheck": "turbo typecheck",
+    "orval": "orval --config ./orval.config.ts"
+  },
+  "devDependencies": {
+    "orval": "^7.21.0",
+    "prettier": "^3.4.2",
+    "turbo": "2.9.16",
+    "typescript": "^5.9.2"
+  }
+}

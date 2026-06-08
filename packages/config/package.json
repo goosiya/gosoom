@@ -1,0 +1,8 @@
+{
+  "name": "@gosoom/config",
+  "version": "0.0.0",
+  "private": true,
+  "files": [
+    "tsconfig.library.json"
+  ]
+}

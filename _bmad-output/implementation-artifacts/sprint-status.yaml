@@ -1,0 +1,97 @@
+# generated: 2026-06-08
+# last_updated: 2026-06-08 (1-4 code-review done, 4 patches applied)
+# project: gosoom
+# project_key: NOKEY
+# tracking_system: file-system
+# story_location: _bmad-output/implementation-artifacts
+
+# STATUS DEFINITIONS:
+# ==================
+# Epic Status:
+#   - backlog: Epic not yet started
+#   - in-progress: Epic actively being worked on
+#   - done: All stories in epic completed
+#
+# Epic Status Transitions:
+#   - backlog → in-progress: Automatically when first story is created (via create-story)
+#   - in-progress → done: Manually when all stories reach 'done' status
+#
+# Story Status:
+#   - backlog: Story only exists in epic file
+#   - ready-for-dev: Story file created in stories folder
+#   - in-progress: Developer actively working on implementation
+#   - review: Ready for code review (via Dev's code-review workflow)
+#   - done: Story completed
+#
+# Retrospective Status:
+#   - optional: Can be completed but not required
+#   - done: Retrospective has been completed
+#
+# WORKFLOW NOTES:
+# ===============
+# - Epic transitions to 'in-progress' automatically when first story is created
+# - Stories can be worked in parallel if team capacity allows
+# - Developer typically creates next story after previous one is 'done' to incorporate learnings
+# - Dev moves story to 'review', then runs code-review (fresh context, different LLM recommended)
+
+generated: 2026-06-08
+last_updated: 2026-06-08 (1-8 done — Dockerfile uv 버전 고정·CMD exec 형식 패치 완료)
+project: gosoom
+project_key: NOKEY
+tracking_system: file-system
+story_location: _bmad-output/implementation-artifacts
+
+development_status:
+  # Epic 1: 기반 구축, 인증 & 배포 골격 (FR1-4)
+  epic-1: in-progress
+  1-1-composed-scaffold: done
+  1-2-backend-db-foundation: done
+  1-3-signup-seed-admin: done
+  1-4-login-logout-jwt: done
+  1-5-rbac: done
+  1-6-categories-api-seed: done
+  1-7-auth-ui-api-client: done
+  1-8-ci-deploy-skeleton: done
+  epic-1-retrospective: optional
+
+  # Epic 2: 고객 서비스 요청 (FR5-7)
+  epic-2: backlog
+  2-1-create-service-request: backlog
+  2-2-my-requests-list-detail: backlog
+  2-3-request-status-management: backlog
+  epic-2-retrospective: optional
+
+  # Epic 3: 고수 카테고리 & 견적 (FR9-12)
+  epic-3: backlog
+  3-1-pro-categories-setup: backlog
+  3-2-matched-requests-feed: backlog
+  3-3-submit-quote: backlog
+  3-4-my-quotes-list: backlog
+  epic-3-retrospective: optional
+
+  # Epic 4: 매칭 & 채팅 (FR8, FR13-18)
+  epic-4: backlog
+  4-1-compare-quotes: backlog
+  4-2-accept-quote-create-chatroom: backlog
+  4-3-reject-quote: backlog
+  4-4-chat-messaging-polling: backlog
+  4-5-chatroom-list: backlog
+  epic-4-retrospective: optional
+
+  # Epic 5: 모바일 앱 (FR1-18 모바일 전달)
+  epic-5: backlog
+  5-1-mobile-shell-auth: backlog
+  5-2-mobile-customer-flow: backlog
+  5-3-mobile-pro-flow: backlog
+  5-4-mobile-chat: backlog
+  epic-5-retrospective: optional
+
+  # Epic 6: 관리자 콘솔 (FR19-24)
+  epic-6: backlog
+  6-1-admin-console-shell-login: backlog
+  6-2-customer-pro-account-management: backlog
+  6-3-admin-account-management: backlog
+  6-4-service-request-management: backlog
+  6-5-chat-history-readonly: backlog
+  6-6-category-management: backlog
+  epic-6-retrospective: optional

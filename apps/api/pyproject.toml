@@ -1,0 +1,48 @@
+[project]
+name = "gosoom-api"
+version = "0.0.0"
+description = "gosoom 통합 API (FastAPI) — router→service→repository"
+requires-python = ">=3.12"
+dependencies = [
+    # 웹 프레임워크
+    "fastapi>=0.115",
+    "uvicorn[standard]>=0.34",
+    # DB 접근 (async) + 마이그레이션 (Story 1.2)
+    "sqlalchemy[asyncio]>=2.0.36",
+    "asyncpg>=0.30",
+    "alembic>=1.14",
+    # 설정/검증
+    "pydantic>=2.10",
+    "pydantic-settings>=2.7",
+    # 보안: Argon2 해싱(AR11) + JWT(HS256, AR11)
+    "pwdlib[argon2]>=0.2.1",
+    "pyjwt>=2.10",
+    # UUIDv7 앱측 생성 (AR4/G4)
+    "uuid7>=0.1.0",
+    "email-validator>=2.3.0",
+]
+
+[dependency-groups]
+dev = [
+    "pytest>=8.3",
+    "pytest-asyncio>=0.25",
+    "httpx>=0.28",
+    "ruff>=0.9",
+]
+
+# uv: 이 PC에서 uv의 managed standalone 3.12 빌드가 실행 불가(0xC0E90002)라
+# 시스템 설치 Python(python.org 3.12)을 우선 사용하도록 강제 (dev/prod 모두 3.12)
+[tool.uv]
+python-preference = "only-system"
+
+[tool.ruff]
+target-version = "py312"
+line-length = 100
+
+# Alembic가 생성하는 마이그레이션은 템플릿 import(op/sa)를 항상 포함 — F401 제외
+[tool.ruff.lint.per-file-ignores]
+"alembic/versions/*" = ["F401"]
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+testpaths = ["tests"]

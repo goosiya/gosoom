@@ -1,0 +1,42 @@
+# 의존성
+node_modules/
+.pnpm-store/
+
+# 빌드 산출물
+.next/
+out/
+dist/
+build/
+.turbo/
+*.tsbuildinfo
+
+# Expo
+.expo/
+.expo-shared/
+expo-export/
+*.orig.*
+web-build/
+
+# Python (apps/api)
+__pycache__/
+*.py[cod]
+.venv/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+
+# 환경변수 (시크릿 — 절대 커밋 금지)
+.env
+.env.local
+.env.*.local
+apps/api/.env
+
+# 에디터/OS
+.DS_Store
+.idea/
+.vscode/*
+!.vscode/extensions.json
+*.log
+
+# Orval 생성 캐시는 커밋(생성물은 추적), 단 임시 openapi 덤프는 제외
+openapi.json
