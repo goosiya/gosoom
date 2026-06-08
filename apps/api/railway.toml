@@ -1,0 +1,7 @@
+[build]
+builder = "DOCKERFILE"
+dockerfilePath = "Dockerfile"
+
+[deploy]
+releaseCommand = "uv run alembic upgrade head"
+healthcheckPath = "/api/v1/health"
