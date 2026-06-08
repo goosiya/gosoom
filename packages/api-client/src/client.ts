@@ -66,13 +66,21 @@ function buildUrl(path: string): string {
   return origin + path;
 }
 
-/** params 객체를 쿼리스트링으로(빈/undefined 값 제외). */
+/** params 객체를 쿼리스트링으로(빈/undefined 값 제외). 배열은 반복 키로 직렬화(?k=a&k=b). */
 function buildQuery(params?: Record<string, unknown>): string {
   if (!params) return '';
   const search = new URLSearchParams();
   for (const [key, value] of Object.entries(params)) {
     if (value === undefined || value === null) continue;
-    search.append(key, String(value));
+    if (Array.isArray(value)) {
+      for (const item of value) {
+        if (item !== undefined && item !== null) {
+          search.append(key, String(item));
+        }
+      }
+    } else {
+      search.append(key, String(value));
+    }
   }
   const qs = search.toString();
   return qs ? `?${qs}` : '';
