@@ -80,10 +80,10 @@ jobs:
         with:
           version: 11.5.2
 
-      - name: Setup Node 20
+      - name: Setup Node 22
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22
           cache: pnpm
 
       # 락파일 고정 설치(드리프트 시 실패). esbuild 등 네이티브 빌드는
