@@ -67,3 +67,24 @@ class CategoryRepository:
         await self.session.flush()
         await self.session.refresh(category)
         return category
+
+    async def get_by_id_any(self, id: UUID) -> Category | None:
+        """관리자용: is_active 무관, 미삭제 카테고리 단건 조회 (Story 6.6)."""
+        result = await self.session.execute(
+            select(Category).where(Category.id == id, Category.deleted_at.is_(None))
+        )
+        return result.scalar_one_or_none()
+
+    async def list_all(self, after_id: UUID | None, limit: int) -> list[Category]:
+        """관리자용: 활성·비활성 모두 포함, 미삭제, id ASC cursor (Story 6.6, AC5)."""
+        stmt = select(Category).where(Category.deleted_at.is_(None))
+        if after_id is not None:
+            stmt = stmt.where(Category.id > after_id)
+        stmt = stmt.order_by(Category.id).limit(limit)
+        return list((await self.session.execute(stmt)).scalars().all())
+
+    async def save(self, category: Category) -> Category:
+        """수정 후 flush/refresh. commit은 호출측 (UserRepository.save 패턴 복제)."""
+        await self.session.flush()
+        await self.session.refresh(category)
+        return category

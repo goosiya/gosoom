@@ -42,11 +42,11 @@ async def _signup(client: AsyncClient, email: str, password: str, role: str = "c
 
 async def test_login_success_returns_tokens(client_db: AsyncClient) -> None:
     """올바른 자격증명 → 200, accessToken/refreshToken/tokenType=="bearer"(AC1)."""
-    await _signup(client_db, "login-ok@example.com", "secret-password", role="pro")
+    await _signup(client_db, "login-ok@example.com", "Secret-password1!", role="pro")
 
     resp = await client_db.post(
         "/api/v1/auth/login",
-        json={"email": "login-ok@example.com", "password": "secret-password"},
+        json={"email": "login-ok@example.com", "password": "Secret-password1!"},
     )
     assert resp.status_code == 200, resp.text
     body = resp.json()
@@ -57,11 +57,11 @@ async def test_login_success_returns_tokens(client_db: AsyncClient) -> None:
 
 async def test_login_access_token_payload(client_db: AsyncClient) -> None:
     """access JWT payload는 {user_id, user_role, type:"access", exp}, role은 가입 역할과 일치(AC1)."""
-    await _signup(client_db, "payload@example.com", "secret-password", role="pro")
+    await _signup(client_db, "payload@example.com", "Secret-password1!", role="pro")
 
     resp = await client_db.post(
         "/api/v1/auth/login",
-        json={"email": "payload@example.com", "password": "secret-password"},
+        json={"email": "payload@example.com", "password": "Secret-password1!"},
     )
     assert resp.status_code == 200, resp.text
     access = resp.json()["accessToken"]
@@ -75,11 +75,11 @@ async def test_login_access_token_payload(client_db: AsyncClient) -> None:
 
 async def test_login_email_case_insensitive(client_db: AsyncClient) -> None:
     """대소문자만 다른 이메일로도 로그인 성공 — 정규화 일관(AC1)."""
-    await _signup(client_db, "Case@Example.com", "secret-password")
+    await _signup(client_db, "Case@Example.com", "Secret-password1!")
 
     resp = await client_db.post(
         "/api/v1/auth/login",
-        json={"email": "case@example.com", "password": "secret-password"},
+        json={"email": "case@example.com", "password": "Secret-password1!"},
     )
     assert resp.status_code == 200, resp.text
 
@@ -89,7 +89,7 @@ async def test_login_email_case_insensitive(client_db: AsyncClient) -> None:
 
 async def test_login_wrong_password_401(client_db: AsyncClient) -> None:
     """비밀번호 불일치 → 401 invalid_credentials, 토큰 미발급(AC2)."""
-    await _signup(client_db, "wrongpw@example.com", "secret-password")
+    await _signup(client_db, "wrongpw@example.com", "Secret-password1!")
 
     resp = await client_db.post(
         "/api/v1/auth/login",
@@ -106,7 +106,7 @@ async def test_login_unknown_email_401(client_db: AsyncClient) -> None:
     """미존재 이메일 → 401 invalid_credentials(AC2)."""
     resp = await client_db.post(
         "/api/v1/auth/login",
-        json={"email": "nobody@example.com", "password": "secret-password"},
+        json={"email": "nobody@example.com", "password": "Secret-password1!"},
     )
     assert resp.status_code == 401, resp.text
     assert resp.json()["code"] == "invalid_credentials"
@@ -116,7 +116,7 @@ async def test_login_inactive_account_401(
     client_db: AsyncClient, db_session: AsyncSession
 ) -> None:
     """비활성 계정(is_active=False) → 401, 토큰 미발급(AC2, FR19/20)."""
-    await _signup(client_db, "inactive@example.com", "secret-password")
+    await _signup(client_db, "inactive@example.com", "Secret-password1!")
     # 가입 직후 비활성화
     user = await UserRepository(db_session).get_by_email("inactive@example.com")
     assert user is not None
@@ -125,7 +125,7 @@ async def test_login_inactive_account_401(
 
     resp = await client_db.post(
         "/api/v1/auth/login",
-        json={"email": "inactive@example.com", "password": "secret-password"},
+        json={"email": "inactive@example.com", "password": "Secret-password1!"},
     )
     assert resp.status_code == 401, resp.text
     body = resp.json()
@@ -138,13 +138,13 @@ async def test_login_failures_are_indistinguishable(
 ) -> None:
     """anti-enumeration(NFR3): 비번불일치·미존재·비활성 세 응답이 code·message 모두 동일."""
     # 비활성 계정 준비
-    await _signup(client_db, "enum-inactive@example.com", "secret-password")
+    await _signup(client_db, "enum-inactive@example.com", "Secret-password1!")
     user = await UserRepository(db_session).get_by_email("enum-inactive@example.com")
     assert user is not None
     user.is_active = False
     await db_session.commit()
     # 비번불일치용 정상 계정
-    await _signup(client_db, "enum-active@example.com", "secret-password")
+    await _signup(client_db, "enum-active@example.com", "Secret-password1!")
 
     wrong_pw = await client_db.post(
         "/api/v1/auth/login",
@@ -152,11 +152,11 @@ async def test_login_failures_are_indistinguishable(
     )
     unknown = await client_db.post(
         "/api/v1/auth/login",
-        json={"email": "enum-nobody@example.com", "password": "secret-password"},
+        json={"email": "enum-nobody@example.com", "password": "Secret-password1!"},
     )
     inactive = await client_db.post(
         "/api/v1/auth/login",
-        json={"email": "enum-inactive@example.com", "password": "secret-password"},
+        json={"email": "enum-inactive@example.com", "password": "Secret-password1!"},
     )
 
     assert wrong_pw.status_code == unknown.status_code == inactive.status_code == 401
@@ -179,7 +179,7 @@ async def _login_tokens(client: AsyncClient, email: str, password: str, role: st
 
 async def test_refresh_success_returns_new_access_only(client_db: AsyncClient) -> None:
     """유효 refresh → 200, 새 accessToken(+tokenType), refreshToken 키 부재(회전 없음, AC3)."""
-    tokens = await _login_tokens(client_db, "refresh-ok@example.com", "secret-password", role="pro")
+    tokens = await _login_tokens(client_db, "refresh-ok@example.com", "Secret-password1!", role="pro")
 
     resp = await client_db.post(
         "/api/v1/auth/refresh", json={"refreshToken": tokens["refreshToken"]}
@@ -198,7 +198,7 @@ async def test_refresh_success_returns_new_access_only(client_db: AsyncClient) -
 
 async def test_refresh_with_access_token_rejected(client_db: AsyncClient) -> None:
     """type 혼동: accessToken을 /refresh에 제출 → 401 invalid_token(AC3)."""
-    tokens = await _login_tokens(client_db, "type-confuse@example.com", "secret-password")
+    tokens = await _login_tokens(client_db, "type-confuse@example.com", "Secret-password1!")
 
     resp = await client_db.post(
         "/api/v1/auth/refresh", json={"refreshToken": tokens["accessToken"]}
@@ -239,7 +239,7 @@ async def test_refresh_after_deactivation_rejected(
 
     refresh가 단순 재서명이 아니라 사용자를 재조회하기에 비활성화가 반영된다 — refresh 설계의 핵심.
     """
-    tokens = await _login_tokens(client_db, "deact@example.com", "secret-password")
+    tokens = await _login_tokens(client_db, "deact@example.com", "Secret-password1!")
     # 발급 후 계정 비활성화
     user = await UserRepository(db_session).get_by_email("deact@example.com")
     assert user is not None

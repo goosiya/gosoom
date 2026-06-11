@@ -35,7 +35,7 @@
 # - Dev moves story to 'review', then runs code-review (fresh context, different LLM recommended)
 
 generated: 2026-06-08
-last_updated: 2026-06-12 (Epic 6 in-progress, 6-1 done, 6-2 done, 6-3 done, 6-4 done, 6-5 done)
+last_updated: 2026-06-12 (Epic 6 in-progress, 6-1 done, 6-2 done, 6-3 done, 6-4 done, 6-5 done, 6-6 done)
 project: gosoom
 project_key: NOKEY
 tracking_system: file-system
@@ -93,5 +93,5 @@ development_status:
   6-3-admin-account-management: done
   6-4-service-request-management: done
   6-5-chat-history-readonly: done
-  6-6-category-management: backlog
+  6-6-category-management: done
   epic-6-retrospective: optional

@@ -32,7 +32,7 @@ async def _signup_and_fetch(
         "/api/v1/auth/signup",
         json={
             "email": email,
-            "password": "secret-password",
+            "password": "Secret-password1!",
             "displayName": "테스트유저",
             "role": role,
         },

@@ -13,11 +13,12 @@ from app.core.db import get_db
 from app.deps import require_role
 from app.models.user import UserRole
 from app.schemas.auth import AdminCreateRequest, UserRead
-from app.schemas.pagination import Page
+from app.schemas.category import CategoryAdminRead, CategoryCreate, CategoryUpdate
 from app.schemas.chat_room import ChatRoomAdminRead
 from app.schemas.message import MessagePageResponse
+from app.schemas.pagination import Page
 from app.schemas.service_request import ServiceRequestAdminRead, ServiceRequestStatusUpdate
-from app.services.admin import AdminChatService, AdminServiceRequestService, AdminUserService
+from app.services.admin import AdminCategoryService, AdminChatService, AdminServiceRequestService, AdminUserService
 
 router = APIRouter(
     prefix="/api/v1/admin",
@@ -137,3 +138,37 @@ async def list_admin_chat_messages(
     db: AsyncSession = Depends(get_db),
 ) -> MessagePageResponse:
     return await AdminChatService(db).list_messages(chat_room_id, before, limit)
+
+
+@router.get("/categories", response_model=Page[CategoryAdminRead])
+async def list_admin_categories(
+    cursor: str | None = Query(None),
+    limit: int = Query(20, ge=1, le=100),
+    db: AsyncSession = Depends(get_db),
+) -> Page[CategoryAdminRead]:
+    return await AdminCategoryService(db).list_categories(cursor, limit)
+
+
+@router.post("/categories", response_model=CategoryAdminRead, status_code=201)
+async def create_admin_category(
+    data: CategoryCreate,
+    db: AsyncSession = Depends(get_db),
+) -> CategoryAdminRead:
+    return await AdminCategoryService(db).create_category(data)
+
+
+@router.patch("/categories/{category_id}", response_model=CategoryAdminRead)
+async def update_admin_category(
+    category_id: UUID,
+    data: CategoryUpdate,
+    db: AsyncSession = Depends(get_db),
+) -> CategoryAdminRead:
+    return await AdminCategoryService(db).update_category(category_id, data)
+
+
+@router.post("/categories/{category_id}/deactivate", response_model=CategoryAdminRead)
+async def deactivate_admin_category(
+    category_id: UUID,
+    db: AsyncSession = Depends(get_db),
+) -> CategoryAdminRead:
+    return await AdminCategoryService(db).deactivate_category(category_id)

@@ -15,7 +15,9 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.exceptions import (
+    CategoryNotFoundError,
     ChatRoomNotFoundError,
+    DuplicateCategoryNameError,
     DuplicateEmailError,
     ForbiddenError,
     InvalidCursorError,
@@ -26,13 +28,17 @@ from app.core.exceptions import (
 )
 from app.core.pagination import decode_cursor, encode_cursor
 from app.core.security import hash_password
-from app.models.service_request import ServiceRequestStatus
+from app.models.category import Category
+from app.models.pro_category import ProCategory
+from app.models.service_request import ServiceRequest, ServiceRequestStatus
 from app.models.user import User, UserRole
+from app.repositories.categories import CategoryRepository
 from app.repositories.chat_rooms import ChatRoomRepository
 from app.repositories.messages import MessageRepository
 from app.repositories.service_requests import ServiceRequestRepository
 from app.repositories.users import UserRepository
 from app.schemas.auth import AdminCreateRequest, UserRead
+from app.schemas.category import CategoryAdminRead, CategoryCreate, CategoryUpdate
 from app.schemas.chat_room import ChatRoomAdminRead
 from app.schemas.message import MessagePageResponse, MessageRead
 from app.schemas.pagination import Page
@@ -336,4 +342,152 @@ class AdminChatService:
         return MessagePageResponse(
             items=[MessageRead.model_validate(m) for m in page],
             next_cursor=next_cursor,
+        )
+
+
+class AdminCategoryService:
+    """카테고리 생성·수정·비활성화 (Story 6.6, FR24)."""
+
+    def __init__(self, session: AsyncSession) -> None:
+        self.repo = CategoryRepository(session)
+        self.session = session
+
+    async def _get_in_use_ids(self, category_ids: list[UUID]) -> set[UUID]:
+        """service_requests 또는 pro_categories에서 참조 중인 카테고리 ID 집합.
+
+        service_requests: deleted_at IS NULL인 행만 (소프트 삭제된 요청 제외).
+        pro_categories: 전체 (고수가 설정한 모든 카테고리 포함).
+        """
+        from sqlalchemy import select as _sel  # noqa: PLC0415
+
+        if not category_ids:
+            return set()
+
+        sr_result = await self.session.execute(
+            _sel(ServiceRequest.category_id).where(
+                ServiceRequest.category_id.in_(category_ids),
+                ServiceRequest.deleted_at.is_(None),
+            ).distinct()
+        )
+        pc_result = await self.session.execute(
+            _sel(ProCategory.category_id).where(
+                ProCategory.category_id.in_(category_ids),
+            ).distinct()
+        )
+        return {row[0] for row in sr_result} | {row[0] for row in pc_result}
+
+    async def list_categories(
+        self,
+        cursor: str | None,
+        limit: int,
+    ) -> "Page[CategoryAdminRead]":
+        """활성·비활성 전체 카테고리 목록 + 사용 여부 (AC5)."""
+        assert limit >= 1, "limit must be >= 1"
+        after_id: UUID | None = None
+        if cursor:
+            try:
+                after_id = UUID(decode_cursor(cursor))
+            except (ValueError, AttributeError) as exc:
+                raise InvalidCursorError() from exc
+
+        rows = await self.repo.list_all(after_id, limit + 1)
+        has_more = len(rows) > limit
+        page = rows[:limit]
+
+        if not page:
+            return Page(items=[], next_cursor=None)
+
+        next_cursor = encode_cursor(str(page[-1].id)) if has_more else None
+
+        in_use_ids = await self._get_in_use_ids([r.id for r in page])
+        items = [
+            CategoryAdminRead(
+                id=r.id,
+                name=r.name,
+                is_active=r.is_active,
+                in_use=(r.id in in_use_ids),
+                created_at=r.created_at,
+                updated_at=r.updated_at,
+            )
+            for r in page
+        ]
+        return Page(items=items, next_cursor=next_cursor)
+
+    async def create_category(self, data: CategoryCreate) -> CategoryAdminRead:
+        """카테고리 생성 (AC1). 이름 중복 시 DuplicateCategoryNameError(409)."""
+        name = data.name  # 스키마 validator에서 이미 strip됨
+        if await self.repo.get_by_name(name) is not None:
+            raise DuplicateCategoryNameError()
+
+        category = Category(name=name, is_active=True)
+        category = await self.repo.create(category)
+        try:
+            await self.session.commit()
+        except IntegrityError:
+            await self.session.rollback()
+            raise DuplicateCategoryNameError()
+
+        in_use_ids = await self._get_in_use_ids([category.id])
+        return CategoryAdminRead(
+            id=category.id,
+            name=category.name,
+            is_active=category.is_active,
+            in_use=(category.id in in_use_ids),
+            created_at=category.created_at,
+            updated_at=category.updated_at,
+        )
+
+    async def update_category(
+        self, category_id: UUID, data: CategoryUpdate
+    ) -> CategoryAdminRead:
+        """카테고리 이름 수정 (AC2). 이름 중복 시 409. 비활성 카테고리도 수정 허용."""
+        category = await self.repo.get_by_id_any(category_id)
+        if category is None:
+            raise CategoryNotFoundError()
+
+        if data.name is not None:
+            name = data.name  # 스키마 validator에서 이미 strip됨
+            existing = await self.repo.get_by_name(name)
+            if existing is not None and existing.id != category_id:
+                raise DuplicateCategoryNameError()
+            category.name = name
+
+        category = await self.repo.save(category)
+        try:
+            await self.session.commit()
+        except IntegrityError:
+            await self.session.rollback()
+            raise DuplicateCategoryNameError()
+
+        in_use_ids = await self._get_in_use_ids([category.id])
+        return CategoryAdminRead(
+            id=category.id,
+            name=category.name,
+            is_active=category.is_active,
+            in_use=(category.id in in_use_ids),
+            created_at=category.created_at,
+            updated_at=category.updated_at,
+        )
+
+    async def deactivate_category(self, category_id: UUID) -> CategoryAdminRead:
+        """카테고리 비활성화 (AC3, AC4). 사용 중 여부 무관하게 항상 허용.
+
+        비활성화 후 GET /api/v1/categories 활성 목록에서 제외된다 (AC4).
+        """
+        category = await self.repo.get_by_id_any(category_id)
+        if category is None:
+            raise CategoryNotFoundError()
+
+        category.is_active = False
+        category = await self.repo.save(category)
+        await self.session.commit()
+
+        in_use_ids = await self._get_in_use_ids([category.id])
+        return CategoryAdminRead(
+            id=category.id,
+            name=category.name,
+            is_active=category.is_active,
+            in_use=(category.id in in_use_ids),
+            created_at=category.created_at,
+            updated_at=category.updated_at,
         )

@@ -167,3 +167,7 @@
 
 - **`useEffect` deps에서 `cursor` 제외** — `apps/admin-web/src/app/(admin)/chats/page.tsx`. `// eslint-disable-next-line react-hooks/exhaustive-deps`로 cursor를 deps에서 제외. 6.2~6.4 기존 패턴과 일관성 유지. background refetch 시 allItems 초기화 위험은 React Query의 queryKey 격리로 실질적으로 완화됨.
 - **UUID7 기반 cursor 페이지네이션** — `apps/api/app/repositories/chat_rooms.py`. `ChatRoom.id < after_id` 비교는 UUID7 단조성에 의존. 프로젝트 전반 기존 패턴(6.2~6.4)과 동일, ID 전략 변경 시 함께 처리.
+
+## Deferred from: code review of 6-6-category-management (2026-06-12)
+
+- **`deactivate_category` 이미 비활성화된 카테고리에 불필요한 flush/commit (Low)** — `apps/api/app/services/admin.py`. 이미 `is_active=False`인 카테고리에 다시 비활성화를 호출해도 `category.is_active = False`(변경 없음) → `repo.save()` → `session.commit()` 이 무조건 실행됨. 멱등성은 유지되나 불필요한 DB write 발생. 조기 반환 가드 추가로 최적화 가능하나 기능 정확성 영향 없음. 프로젝트 전반 서비스 계층 멱등성 가드 정책 수립 시 처리.

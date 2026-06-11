@@ -6,13 +6,18 @@
  */
 
 export * from './adminCreateRequest';
+export * from './categoryAdminRead';
+export * from './categoryCreate';
 export * from './categoryRead';
+export * from './categoryUpdate';
+export * from './categoryUpdateName';
 export * from './chatRoomAdminRead';
 export * from './chatRoomAdminReadServiceRequest';
 export * from './chatRoomListItem';
 export * from './chatRoomListItemServiceRequest';
 export * from './chatRoomRead';
 export * from './hTTPValidationError';
+export * from './listAdminCategoriesParams';
 export * from './listAdminChatMessagesParams';
 export * from './listAdminChatRoomsParams';
 export * from './listAdminServiceRequestsParams';
@@ -31,6 +36,8 @@ export * from './messageListResponse';
 export * from './messagePageResponse';
 export * from './messagePageResponseNextCursor';
 export * from './messageRead';
+export * from './pageCategoryAdminRead';
+export * from './pageCategoryAdminReadNextCursor';
 export * from './pageCategoryRead';
 export * from './pageCategoryReadNextCursor';
 export * from './pageChatRoomAdminRead';

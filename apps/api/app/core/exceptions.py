@@ -257,3 +257,14 @@ class SeedAdminDeactivationError(AppError):
             message="시드 관리자는 비활성화할 수 없습니다.",
             status_code=409,
         )
+
+
+class DuplicateCategoryNameError(AppError):
+    """이미 존재하는 카테고리 이름 생성·수정 시 (Story 6.6). 409."""
+
+    def __init__(self) -> None:
+        super().__init__(
+            code="category_name_already_exists",
+            message="이미 존재하는 카테고리 이름입니다.",
+            status_code=409,
+        )

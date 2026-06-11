@@ -20,14 +20,19 @@ import type {
 
 import type {
   AdminCreateRequest,
+  CategoryAdminRead,
+  CategoryCreate,
+  CategoryUpdate,
   ChatRoomAdminRead,
   HTTPValidationError,
+  ListAdminCategoriesParams,
   ListAdminChatMessagesParams,
   ListAdminChatRoomsParams,
   ListAdminServiceRequestsParams,
   ListAdminUsersParams,
   ListAdminsParams,
   MessagePageResponse,
+  PageCategoryAdminRead,
   PageChatRoomAdminRead,
   PageServiceRequestAdminRead,
   PageUserRead,
@@ -905,3 +910,263 @@ export function useListAdminChatMessages<TData = Awaited<ReturnType<typeof list_
 
 
 
+/**
+ * @summary List Admin Categories
+ */
+export const list_admin_categories = (
+    params?: ListAdminCategoriesParams,
+ options?: SecondParameter<typeof apiClient>,signal?: AbortSignal
+) => {
+      
+      
+      return apiClient<PageCategoryAdminRead>(
+      {url: `/api/v1/admin/categories`, method: 'GET',
+        params, signal
+    },
+      options);
+    }
+  
+
+
+
+export const getListAdminCategoriesQueryKey = (params?: ListAdminCategoriesParams,) => {
+    return [
+    `/api/v1/admin/categories`, ...(params ? [params]: [])
+    ] as const;
+    }
+
+    
+export const getListAdminCategoriesQueryOptions = <TData = Awaited<ReturnType<typeof list_admin_categories>>, TError = HTTPValidationError>(params?: ListAdminCategoriesParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof list_admin_categories>>, TError, TData>, request?: SecondParameter<typeof apiClient>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getListAdminCategoriesQueryKey(params);
+
+  
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof list_admin_categories>>> = ({ signal }) => list_admin_categories(params, requestOptions, signal);
+
+      
+
+      
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof list_admin_categories>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type ListAdminCategoriesQueryResult = NonNullable<Awaited<ReturnType<typeof list_admin_categories>>>
+export type ListAdminCategoriesQueryError = HTTPValidationError
+
+
+/**
+ * @summary List Admin Categories
+ */
+
+export function useListAdminCategories<TData = Awaited<ReturnType<typeof list_admin_categories>>, TError = HTTPValidationError>(
+ params?: ListAdminCategoriesParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof list_admin_categories>>, TError, TData>, request?: SecondParameter<typeof apiClient>}
+  
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getListAdminCategoriesQueryOptions(params,options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  query.queryKey = queryOptions.queryKey ;
+
+  return query;
+}
+
+
+
+
+/**
+ * @summary Create Admin Category
+ */
+export const create_admin_category = (
+    categoryCreate: CategoryCreate,
+ options?: SecondParameter<typeof apiClient>,signal?: AbortSignal
+) => {
+      
+      
+      return apiClient<CategoryAdminRead>(
+      {url: `/api/v1/admin/categories`, method: 'POST',
+      headers: {'Content-Type': 'application/json', },
+      data: categoryCreate, signal
+    },
+      options);
+    }
+  
+
+
+export const getCreateAdminCategoryMutationOptions = <TError = HTTPValidationError,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof create_admin_category>>, TError,{data: CategoryCreate}, TContext>, request?: SecondParameter<typeof apiClient>}
+): UseMutationOptions<Awaited<ReturnType<typeof create_admin_category>>, TError,{data: CategoryCreate}, TContext> => {
+
+const mutationKey = ['createAdminCategory'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+      
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof create_admin_category>>, {data: CategoryCreate}> = (props) => {
+          const {data} = props ?? {};
+
+          return  create_admin_category(data,requestOptions)
+        }
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type CreateAdminCategoryMutationResult = NonNullable<Awaited<ReturnType<typeof create_admin_category>>>
+    export type CreateAdminCategoryMutationBody = CategoryCreate
+    export type CreateAdminCategoryMutationError = HTTPValidationError
+
+    /**
+ * @summary Create Admin Category
+ */
+export const useCreateAdminCategory = <TError = HTTPValidationError,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof create_admin_category>>, TError,{data: CategoryCreate}, TContext>, request?: SecondParameter<typeof apiClient>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof create_admin_category>>,
+        TError,
+        {data: CategoryCreate},
+        TContext
+      > => {
+
+      const mutationOptions = getCreateAdminCategoryMutationOptions(options);
+
+      return useMutation(mutationOptions);
+    }
+    /**
+ * @summary Update Admin Category
+ */
+export const update_admin_category = (
+    categoryId: string,
+    categoryUpdate: CategoryUpdate,
+ options?: SecondParameter<typeof apiClient>,) => {
+      
+      
+      return apiClient<CategoryAdminRead>(
+      {url: `/api/v1/admin/categories/${categoryId}`, method: 'PATCH',
+      headers: {'Content-Type': 'application/json', },
+      data: categoryUpdate
+    },
+      options);
+    }
+  
+
+
+export const getUpdateAdminCategoryMutationOptions = <TError = HTTPValidationError,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof update_admin_category>>, TError,{categoryId: string;data: CategoryUpdate}, TContext>, request?: SecondParameter<typeof apiClient>}
+): UseMutationOptions<Awaited<ReturnType<typeof update_admin_category>>, TError,{categoryId: string;data: CategoryUpdate}, TContext> => {
+
+const mutationKey = ['updateAdminCategory'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+      
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof update_admin_category>>, {categoryId: string;data: CategoryUpdate}> = (props) => {
+          const {categoryId,data} = props ?? {};
+
+          return  update_admin_category(categoryId,data,requestOptions)
+        }
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type UpdateAdminCategoryMutationResult = NonNullable<Awaited<ReturnType<typeof update_admin_category>>>
+    export type UpdateAdminCategoryMutationBody = CategoryUpdate
+    export type UpdateAdminCategoryMutationError = HTTPValidationError
+
+    /**
+ * @summary Update Admin Category
+ */
+export const useUpdateAdminCategory = <TError = HTTPValidationError,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof update_admin_category>>, TError,{categoryId: string;data: CategoryUpdate}, TContext>, request?: SecondParameter<typeof apiClient>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof update_admin_category>>,
+        TError,
+        {categoryId: string;data: CategoryUpdate},
+        TContext
+      > => {
+
+      const mutationOptions = getUpdateAdminCategoryMutationOptions(options);
+
+      return useMutation(mutationOptions);
+    }
+    /**
+ * @summary Deactivate Admin Category
+ */
+export const deactivate_admin_category = (
+    categoryId: string,
+ options?: SecondParameter<typeof apiClient>,signal?: AbortSignal
+) => {
+      
+      
+      return apiClient<CategoryAdminRead>(
+      {url: `/api/v1/admin/categories/${categoryId}/deactivate`, method: 'POST', signal
+    },
+      options);
+    }
+  
+
+
+export const getDeactivateAdminCategoryMutationOptions = <TError = HTTPValidationError,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deactivate_admin_category>>, TError,{categoryId: string}, TContext>, request?: SecondParameter<typeof apiClient>}
+): UseMutationOptions<Awaited<ReturnType<typeof deactivate_admin_category>>, TError,{categoryId: string}, TContext> => {
+
+const mutationKey = ['deactivateAdminCategory'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+      
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof deactivate_admin_category>>, {categoryId: string}> = (props) => {
+          const {categoryId} = props ?? {};
+
+          return  deactivate_admin_category(categoryId,requestOptions)
+        }
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type DeactivateAdminCategoryMutationResult = NonNullable<Awaited<ReturnType<typeof deactivate_admin_category>>>
+    
+    export type DeactivateAdminCategoryMutationError = HTTPValidationError
+
+    /**
+ * @summary Deactivate Admin Category
+ */
+export const useDeactivateAdminCategory = <TError = HTTPValidationError,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deactivate_admin_category>>, TError,{categoryId: string}, TContext>, request?: SecondParameter<typeof apiClient>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof deactivate_admin_category>>,
+        TError,
+        {categoryId: string},
+        TContext
+      > => {
+
+      const mutationOptions = getDeactivateAdminCategoryMutationOptions(options);
+
+      return useMutation(mutationOptions);
+    }
+    
