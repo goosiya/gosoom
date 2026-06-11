@@ -35,7 +35,7 @@
 # - Dev moves story to 'review', then runs code-review (fresh context, different LLM recommended)
 
 generated: 2026-06-08
-last_updated: 2026-06-11 (Story 5-3 done, 8 patches applied)
+last_updated: 2026-06-11 (Epic 5 EAS Android 개발 빌드 완료·Metro 연결 확인)
 project: gosoom
 project_key: NOKEY
 tracking_system: file-system
@@ -83,7 +83,7 @@ development_status:
   5-1-mobile-shell-auth: done
   5-2-mobile-customer-flow: done
   5-3-mobile-pro-flow: done
-  5-4-mobile-chat: backlog
+  5-4-mobile-chat: done
   epic-5-retrospective: optional
 
   # Epic 6: 관리자 콘솔 (FR19-24)

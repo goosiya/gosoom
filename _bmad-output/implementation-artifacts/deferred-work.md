@@ -127,3 +127,15 @@
 - **status cancelled/closed 등 상태 UI 안내 없음 (Low)** — `apps/user-web/src/app/(pro)/feed/[id]/page.tsx`. open/matched 외 상태(cancelled, completed 등)일 때 아무 메시지도 표시되지 않음. 현재 피드 API가 이 상태들을 필터링하므로 실제 노출 불가. 피드 필터 정책 변경 또는 UX 개선 시 처리.
 - **프론트 더블 제출 (Low)** — `apps/user-web/src/app/(pro)/feed/[id]/page.tsx`. isPending 전환 전 두 번째 클릭이 발생하면 두 번째 요청은 409 DuplicateQuoteError를 받아 에러 표시. 서버는 올바르게 처리하나 UX 혼란. 서버 보호로 데이터 무결성은 유지됨. 폼 제출 비활성화 UX 개선 시 처리.
 - **downgrade checkfirst=False 멱등성 미보장 (Low)** — `apps/api/alembic/versions/d7bffeb07473_add_quotes_table.py:48`. `sa.Enum(name='quote_status').drop(..., checkfirst=False)` — enum 타입이 없는 상태에서 downgrade 재실행 시 ProgrammingError 발생. 프로젝트 전체 마이그레이션이 동일 패턴 사용 — 전체 일괄 교체(`op.execute("DROP TYPE IF EXISTS quote_status")` 방식) 시 처리. 정상 up→down 경로는 안전.
+
+## Deferred from: code review of 5-4-mobile-chat (2026-06-11)
+
+- **ChatRoomScreen 초기 로드 후 첫 2초 빈 화면 flash (Low)** — `apps/mobile/src/components/chat/ChatRoomScreen.tsx`. `isPending` false 후 첫 폴링 결과까지 빈 채팅 화면이 표시됨. MVP Dev Notes에서 "메모리 누적 허용" 패턴과 같이 MVP 범위 허용. 로딩 스피너 추가 등 UX 개선 시 처리.
+- **`acceptMutation.onSuccess`에서 `invalidateQueries` await 없이 navigate (Low)** — `apps/mobile/src/app/(customer)/requests/[id].tsx:110–115`. 기존 패턴(`user-web/src/app/(customer)/requests/[id]/page.tsx`)과 동일하며 채팅 화면 진입에 기능적 영향 없음. 비동기 cache invalidation 아키텍처 정비 시 처리.
+- **`useListChatRooms` 쿼리 키에 cursor 포함 여부 확인 불가 (Low)** — `apps/mobile/src/components/chat/ChatRoomListScreen.tsx:41–43`. orval 코드젠 내부 동작으로 이 파일에서 직접 제어 불가. 현재 `processedCursors` 패턴으로 중복 처리는 방지됨. 코드젠 설정 변경 또는 raw useQuery 전환 검토 시 처리.
+- **메시지 API 응답 정렬 방향 방어 로직 없음 (Low)** — `apps/mobile/src/components/chat/ChatRoomScreen.tsx`. API 계약(오름차순 반환)에 의존. 웹 버전(`apps/user-web/src/app/chat/[id]/page.tsx`)도 동일 패턴. API 정렬 방향 계약 변경 시 클라이언트 sort 방어 로직 추가.
+- **`nextCursor` 빈 문자열 처리 미비 (Low)** — `apps/mobile/src/components/chat/ChatRoomListScreen.tsx:58–60`. `handleLoadMore`의 `if (nextCursor && ...)` 체크가 빈 문자열 `""`을 falsy로 처리. 서버 API 스펙에 빈 문자열 커서 반환 케이스 미정의 — API 계약 명확화 시 처리.
+
+## Deferred from: Epic 5 모바일 EAS 빌드 환경 구축 (2026-06-11)
+
+- **iOS EAS Development Build 미수행 (Low)** — Android APK EAS Development Build만 완료(`goosiya/projects/mobile/builds/0b892a4b`). iOS는 Apple Developer Program 계정이 필요하며 빌드·배포 절차가 별도. **사유:** KTH가 Android만 요청. iOS 테스트 필요 시 `eas build --profile development --platform ios` 실행.
