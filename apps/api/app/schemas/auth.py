@@ -6,6 +6,7 @@
   로그인 입력은 JSON(camelCase) — form-data(`OAuth2PasswordRequestForm`)가 아니다(Orval 일관성).
 """
 
+import re
 from datetime import datetime
 from typing import Literal
 from uuid import UUID
@@ -35,6 +36,19 @@ class SignupRequest(CamelModel):
         # 동일 사용자 중복 가입 방지. get_by_email도 동일 정규화 → 읽기/쓰기 경계 일관.
         return v.strip().lower()
 
+    @field_validator("password", mode="after")
+    @classmethod
+    def _validate_password_complexity(cls, v: str) -> str:
+        if not re.search(r"[A-Z]", v):
+            raise ValueError("비밀번호에 대문자가 1자 이상 포함되어야 합니다.")
+        if not re.search(r"[a-z]", v):
+            raise ValueError("비밀번호에 소문자가 1자 이상 포함되어야 합니다.")
+        if not re.search(r"\d", v):
+            raise ValueError("비밀번호에 숫자가 1자 이상 포함되어야 합니다.")
+        if not re.search(r"[!@#$%^&*()_+\-=\[\]{};':\"\\|,.<>/?`~]", v):
+            raise ValueError("비밀번호에 특수문자가 1자 이상 포함되어야 합니다.")
+        return v
+
     @field_validator("display_name", mode="after")
     @classmethod
     def _strip_display_name(cls, v: str) -> str:
@@ -54,6 +68,7 @@ class UserRead(CamelModel):
     display_name: str
     user_role: UserRole
     is_active: bool
+    is_seed: bool
     created_at: datetime
     updated_at: datetime
 
@@ -100,3 +115,37 @@ class RefreshResponse(CamelModel):
 
     access_token: str
     token_type: str = "bearer"
+
+
+class AdminCreateRequest(CamelModel):
+    """관리자가 신규 관리자를 생성하는 입력. role은 항상 admin으로 고정 — 입력 불필요(FR21)."""
+
+    email: EmailStr
+    password: str = Field(min_length=8, max_length=128)
+    display_name: str = Field(min_length=1, max_length=50)
+
+    @field_validator("email", mode="after")
+    @classmethod
+    def _normalize_email(cls, v: str) -> str:
+        return v.strip().lower()
+
+    @field_validator("password", mode="after")
+    @classmethod
+    def _validate_password_complexity(cls, v: str) -> str:
+        if not re.search(r"[A-Z]", v):
+            raise ValueError("비밀번호에 대문자가 1자 이상 포함되어야 합니다.")
+        if not re.search(r"[a-z]", v):
+            raise ValueError("비밀번호에 소문자가 1자 이상 포함되어야 합니다.")
+        if not re.search(r"\d", v):
+            raise ValueError("비밀번호에 숫자가 1자 이상 포함되어야 합니다.")
+        if not re.search(r"[!@#$%^&*()_+\-=\[\]{};':\"\\|,.<>/?`~]", v):
+            raise ValueError("비밀번호에 특수문자가 1자 이상 포함되어야 합니다.")
+        return v
+
+    @field_validator("display_name", mode="after")
+    @classmethod
+    def _strip_display_name(cls, v: str) -> str:
+        stripped = v.strip()
+        if not stripped:
+            raise ValueError("표시명은 공백일 수 없습니다.")
+        return stripped

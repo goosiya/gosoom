@@ -28,4 +28,5 @@ export * from './generated/pros/pros';
 export * from './generated/quotes/quotes';
 export * from './generated/chat-rooms/chat-rooms';
 export * from './generated/default/default';
+export * from './generated/admin/admin';
 export * from './generated/model';

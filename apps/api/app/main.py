@@ -20,6 +20,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.core.config import settings
 from app.core.db import get_db
 from app.core.exceptions import AppError
+from app.routers.admin import router as admin_router
 from app.routers.auth import router as auth_router
 from app.routers.categories import router as categories_router
 from app.routers.chat import router as chat_router
@@ -124,3 +125,4 @@ app.include_router(service_requests_router)
 app.include_router(pros_router)
 app.include_router(quotes_router)
 app.include_router(chat_router)
+app.include_router(admin_router)

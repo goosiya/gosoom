@@ -136,6 +136,23 @@
 - **메시지 API 응답 정렬 방향 방어 로직 없음 (Low)** — `apps/mobile/src/components/chat/ChatRoomScreen.tsx`. API 계약(오름차순 반환)에 의존. 웹 버전(`apps/user-web/src/app/chat/[id]/page.tsx`)도 동일 패턴. API 정렬 방향 계약 변경 시 클라이언트 sort 방어 로직 추가.
 - **`nextCursor` 빈 문자열 처리 미비 (Low)** — `apps/mobile/src/components/chat/ChatRoomListScreen.tsx:58–60`. `handleLoadMore`의 `if (nextCursor && ...)` 체크가 빈 문자열 `""`을 falsy로 처리. 서버 API 스펙에 빈 문자열 커서 반환 케이스 미정의 — API 계약 명확화 시 처리.
 
+## Deferred from: code review of 6-3-admin-account-management (2026-06-12)
+
+- **commit 실패 시 rollback 누락 — `deactivate_admin`/`deactivate_user`/`activate_user` (Low)** — `apps/api/app/services/admin.py:77,89,142`. `session.commit()` 호출이 try/except 없이 노출. commit 실패 시 session이 dirty 상태로 남음. **사유:** `create_admin`을 제외한 서비스 메서드 전체가 동일 패턴 사용 — Story 6.2에서도 동일. 프로젝트 전체 서비스 계층 예외 처리 정책 수립 시 일괄 처리.
+- **유효 형식이나 존재하지 않는 UUID cursor 입력 시 빈 결과 반환 (Low)** — `apps/api/app/services/admin.py:98-111`. 삭제된 사용자의 UUID cursor가 구조적으로 유효하지만 DB에 없으면 에러 없이 빈 결과 반환. keyset pagination 표준 동작이나 클라이언트는 stale cursor 여부를 알 수 없음. **사유:** `list_users`(Story 6.2)와 동일 패턴. cursor 서명 도입 또는 explicit stale cursor 오류 정책 수립 시 일괄 처리.
+- **`list_admins`/`list_users` cursor 페이지네이션 로직 완전 중복 (DRY 위반) (Low)** — `apps/api/app/services/admin.py:36-58,92-111`. cursor decode → `list_by_role` → has_more → encode_cursor 10줄 블록이 두 메서드에 동일하게 복사됨. **사유:** 기능 정확성 영향 없음. `_paginate_by_role(role, cursor, limit)` 헬퍼로 리팩토링 시 처리.
+
 ## Deferred from: Epic 5 모바일 EAS 빌드 환경 구축 (2026-06-11)
 
 - **iOS EAS Development Build 미수행 (Low)** — Android APK EAS Development Build만 완료(`goosiya/projects/mobile/builds/0b892a4b`). iOS는 Apple Developer Program 계정이 필요하며 빌드·배포 절차가 별도. **사유:** KTH가 Android만 요청. iOS 테스트 필요 시 `eas build --profile development --platform ios` 실행.
+
+## Deferred from: code review of 6-1-admin-console-shell-login (2026-06-11)
+
+- **`subscribe = () => () => {}` noop 패턴** — `AdminGuard.tsx:8`. `useSyncExternalStore`의 구독 함수가 noop이어서 `isAuthenticated()` 값이 외부에서 변경되어도 컴포넌트가 재렌더링되지 않음. 스펙 명시 코드 + user-web 동일 패턴. auth failure handler(`Providers.tsx`)가 실제 토큰 만료 리다이렉트를 처리하므로 현재 설계 범위에서 안전. 인증 아키텍처 정비 시 실제 store subscriber 연결 검토.
+- **루트 `page.tsx` 무조건 `/dashboard` 리다이렉트** — `apps/admin-web/src/app/page.tsx:4`. 미인증 사용자도 일단 `/dashboard`로 보내 AdminGuard가 `/login`으로 리다이렉트하는 2-hop 구조. AdminGuard가 실제 보호 담당으로 기능상 문제 없음. Next.js middleware 기반 서버사이드 라우트 보호 도입 시 개선 가능.
+- **SSR 하이드레이션 시 `getServerSnapshot = () => false`** — `AdminGuard.tsx:9`. 서버 렌더링 중 항상 `false`를 반환해 refresh 토큰이 있는 인증 사용자도 하이드레이션 완료 전 잠깐 `null` 상태를 겪을 수 있음. user-web 동일 패턴. 플리커 최소화가 필요할 경우 SSR 로딩 스켈레톤 도입 검토.
+
+## Deferred from: code review of 6-2-customer-pro-account-management (2026-06-11)
+
+- **이중 비활성화/재활성화 무응답** — `services/admin.py:deactivate_user/activate_user`. 이미 비활성 계정 재비활성화 또는 이미 활성 계정 재활성화 시 에러 없이 DB write 수행. REST 멱등성 관례상 허용 범위이나 AC2/AC3 문구("활성 계정을", "비활성화된 계정을")와 불일치. 상태 전이 엄밀성이 필요할 경우 ConflictError(409) 반환 추가 검토.
+- **commit 후 model_validate async 위험** — `services/admin.py:deactivate_user/activate_user`. `save()`(flush+refresh) → `session.commit()` → `UserRead.model_validate(user)` 순서에서, SQLAlchemy 기본 `expire_on_commit=True` 설정 시 commit 후 user 속성 접근이 async lazy load를 유발해 MissingGreenlet 오류 가능. 프로젝트의 다른 서비스가 동일 패턴을 사용하므로 세션 설정(`expire_on_commit` 값) 확인 필요. 문제 발생 시 `commit()` 이후 `await session.refresh(user)` 추가 또는 model_validate를 commit 전에 호출하는 방식으로 수정.

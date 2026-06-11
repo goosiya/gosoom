@@ -235,3 +235,25 @@ class ChatRoomNotFoundError(AppError):
             message="채팅방을 찾을 수 없습니다.",
             status_code=404,
         )
+
+
+class UserNotFoundError(AppError):
+    """존재하지 않거나 삭제된 사용자 조회 시(Story 6.2 AC1). 404."""
+
+    def __init__(self) -> None:
+        super().__init__(
+            code="user_not_found",
+            message="사용자를 찾을 수 없습니다.",
+            status_code=404,
+        )
+
+
+class SeedAdminDeactivationError(AppError):
+    """시드 관리자 비활성화 시도 시(FR21). 409."""
+
+    def __init__(self) -> None:
+        super().__init__(
+            code="seed_admin_deactivation_forbidden",
+            message="시드 관리자는 비활성화할 수 없습니다.",
+            status_code=409,
+        )

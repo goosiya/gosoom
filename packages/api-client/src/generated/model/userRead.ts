@@ -15,6 +15,7 @@ export interface UserRead {
   displayName: string;
   userRole: UserRole;
   isActive: boolean;
+  isSeed: boolean;
   createdAt: string;
   updatedAt: string;
 }

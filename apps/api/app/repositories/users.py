@@ -10,7 +10,7 @@ from uuid import UUID
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.models.user import User
+from app.models.user import User, UserRole
 
 
 class UserRepository:
@@ -53,6 +53,33 @@ class UserRepository:
             )
         )
         return list(result.scalars().all())
+
+    async def list_by_role(
+        self,
+        role: UserRole,
+        after_id: UUID | None,
+        limit: int,
+    ) -> list[User]:
+        """역할별 미삭제 사용자 목록 — id DESC keyset cursor 페이지네이션.
+
+        after_id가 None이면 첫 페이지. deleted_at IS NULL 공통 필터 유지.
+        """
+        stmt = (
+            select(User)
+            .where(User.user_role == role, User.deleted_at.is_(None))
+            .order_by(User.id.desc())
+            .limit(limit)
+        )
+        if after_id is not None:
+            stmt = stmt.where(User.id < after_id)
+        result = await self.session.execute(stmt)
+        return list(result.scalars().all())
+
+    async def save(self, user: User) -> User:
+        """변경된 사용자 flush/refresh. commit은 service가 수행."""
+        await self.session.flush()
+        await self.session.refresh(user)
+        return user
 
     async def create(self, user: User) -> User:
         """사용자 추가 후 flush/refresh로 DB 생성값(타임스탬프 등) 반영. commit은 service가 수행."""
