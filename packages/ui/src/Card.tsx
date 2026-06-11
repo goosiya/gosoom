@@ -2,6 +2,8 @@
 import type { ReactNode } from 'react';
 import { View, StyleSheet } from 'react-native';
 
+import { tokens } from './tokens';
+
 export interface CardProps {
   children: ReactNode;
 }
@@ -12,11 +14,16 @@ export function Card({ children }: CardProps) {
 
 const styles = StyleSheet.create({
   card: {
-    backgroundColor: '#ffffff',
-    borderRadius: 12,
-    padding: 16,
-    gap: 12,
+    backgroundColor: tokens.colors.background,
+    borderRadius: tokens.radius.lg,
+    padding: tokens.spacing.lg,
+    gap: tokens.spacing.sm,
     borderWidth: 1,
-    borderColor: '#e2e8f0',
+    borderColor: tokens.colors.border,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 3,
+    elevation: 1,
   },
 });

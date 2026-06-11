@@ -1,6 +1,8 @@
 // RN-Web 호환 Input 프리미티브 (AR16).
 import { TextInput, StyleSheet } from 'react-native';
 
+import { tokens } from './tokens';
+
 export interface InputProps {
   value: string;
   onChangeText: (text: string) => void;
@@ -26,7 +28,7 @@ export function Input({
       value={value}
       onChangeText={onChangeText}
       placeholder={placeholder}
-      placeholderTextColor="#94a3b8"
+      placeholderTextColor={tokens.colors.textDisabled}
       secureTextEntry={secureTextEntry}
       keyboardType={keyboardType}
       editable={editable}
@@ -38,16 +40,16 @@ export function Input({
 const styles = StyleSheet.create({
   base: {
     borderWidth: 1,
-    borderColor: '#cbd5e1',
-    borderRadius: 8,
-    paddingVertical: 12,
-    paddingHorizontal: 14,
-    fontSize: 16,
-    color: '#0f172a',
-    backgroundColor: '#ffffff',
+    borderColor: tokens.colors.border,
+    borderRadius: tokens.radius.md,
+    paddingVertical: tokens.spacing.md,
+    paddingHorizontal: tokens.spacing.md,
+    fontSize: tokens.fontSize.base,
+    color: tokens.colors.text,
+    backgroundColor: tokens.colors.background,
   },
   disabled: {
-    backgroundColor: '#f1f5f9',
-    color: '#94a3b8',
+    backgroundColor: tokens.colors.backgroundSecondary,
+    color: tokens.colors.textDisabled,
   },
 });

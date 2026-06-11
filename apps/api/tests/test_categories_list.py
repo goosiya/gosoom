@@ -18,6 +18,7 @@ from uuid import UUID
 
 import pytest
 from httpx import AsyncClient
+from sqlalchemy import delete
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.pagination import encode_cursor
@@ -88,6 +89,8 @@ async def test_list_categories_success_envelope_format(
     client_db: AsyncClient, db_session: AsyncSession
 ) -> None:
     """활성 카테고리 → 200, {items, nextCursor} envelope, item camelCase, deletedAt 부재(AC1)."""
+    await db_session.execute(delete(Category))
+    await db_session.flush()
     user = await _make_user(db_session, "cat-ok@example.com")
     await _make_category(db_session, "청소")
     await _make_category(db_session, "이사")
@@ -117,6 +120,8 @@ async def test_list_categories_excludes_inactive_and_soft_deleted(
     client_db: AsyncClient, db_session: AsyncSession
 ) -> None:
     """활성 1 + 비활성 1 + 소프트삭제 1 → 활성 1개만 반환(두 제외 조건 모두 증명, AC1)."""
+    await db_session.execute(delete(Category))
+    await db_session.flush()
     user = await _make_user(db_session, "cat-filter@example.com")
     await _make_category(db_session, "활성카테고리", is_active=True)
     await _make_category(db_session, "비활성카테고리", is_active=False)
@@ -153,6 +158,8 @@ async def test_list_categories_pagination_works(
     client_db: AsyncClient, db_session: AsyncSession
 ) -> None:
     """활성 5개 + limit=2 → 3페이지(2/2/1), 합집합=전체, 중복 없음, 마지막 nextCursor=null(AC4)."""
+    await db_session.execute(delete(Category))
+    await db_session.flush()
     user = await _make_user(db_session, "cat-page@example.com")
     # uuid7은 시간정렬이라 생성 순서대로 id 증가 → keyset(id ASC) 검증에 적합.
     for i in range(5):

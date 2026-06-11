@@ -212,9 +212,26 @@ pnpm dlx create-expo-app@latest apps/mobile      # Expo SDK 55 핀(아래 결정
 - **서버 상태:** **TanStack Query v5** — 폴링은 `refetchInterval`, 캐시·재검증 일원화. api-client 훅(Orval) 소비.
 - **클라이언트 상태:** 최소화(인증 토큰·UI 상태). 전역 상태 라이브러리 도입은 필요 시에만(과설계 금지).
 - **라우팅/가드:** App Router 레이아웃에서 역할 기반 가드(미인증·권한 외 리다이렉트). 권한 최종 시행은 서버(NFR4).
-- **스타일:** Tailwind(웹) + NativeWind(모바일), 공유 `packages/ui`(RN Web 호환 프리미티브).
+- **스타일:** Tailwind v4(웹) + NativeWind v4(모바일, tailwindcss@3 기반), 공유 `packages/ui`(RN Web 호환 프리미티브).
 - **환경:** `NEXT_PUBLIC_API_URL` / `EXPO_PUBLIC_API_URL`로 API 베이스 주입(로컬·배포 분리).
   Expo Go 실기기=LAN IP 또는 배포 Railway URL(localhost 불가).
+
+#### user-web 디자인 시스템 (Epic 1~4 완료 시점 확정, 2026-06-11)
+
+- **컴포넌트 라이브러리:** **shadcn/ui** (v4.11.0) — `src/components/ui/` 하위에 button, input, card, badge, label, textarea, select, separator 설치됨.
+  - user-web 페이지는 **`@gosoom/ui` 직접 사용 금지**. shadcn/ui를 사용한다(`@gosoom/ui`는 mobile 전용).
+- **브랜드 컬러:** Primary = `#1360F5` → `oklch(0.506 0.236 264.4)`. globals.css `--primary` 변수로 관리.
+- **공통 레이아웃 컴포넌트:** `src/components/AppHeader.tsx` — sticky h-14 전역 헤더.
+  - `/login`, `/signup`에서 `null` 반환(인증 페이지는 전체화면 Card 레이아웃 사용).
+  - 고객 네비: 내 요청 / 채팅. 고수 네비: 요청 피드 / 내 견적 / 카테고리 / 채팅.
+- **페이지 레이아웃:** 기본 `max-w-screen-lg mx-auto p-6`. 채팅 상세는 `h-[calc(100vh-3.5rem)]`(AppHeader 높이 보정).
+- **컨벤션:** 상세 패턴(임포트 규칙, 폼 패턴, 상태 Badge, 채팅 메시지 스타일 등)은 `apps/user-web/CLAUDE.md` 참조.
+
+#### mobile 디자인 시스템 (인프라만 준비, 기능 페이지는 bmad 루프로 개발)
+
+- **NativeWind v4** 세팅 완료 (tailwindcss@3, babel.config.js, metro.config.js withNativeWind, global.css).
+- **브랜드 토큰:** `packages/ui/src/tokens.ts` — React Native StyleSheet용 색상·간격·반경 상수. 모바일 컴포넌트는 이 토큰을 참조한다.
+- mobile 기능 페이지 신규 개발 시: NativeWind className + tokens.ts 조합 사용. `@gosoom/ui` 공유 프리미티브 활용.
 
 ### Infrastructure & Deployment
 

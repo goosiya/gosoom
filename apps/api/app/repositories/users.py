@@ -42,6 +42,18 @@ class UserRepository:
         )
         return result.scalar_one_or_none()
 
+    async def list_by_ids(self, ids: list[UUID]) -> list[User]:
+        """UUID 목록으로 미삭제 사용자 batch 조회."""
+        if not ids:
+            return []
+        result = await self.session.execute(
+            select(User).where(
+                User.id.in_(ids),
+                User.deleted_at.is_(None),
+            )
+        )
+        return list(result.scalars().all())
+
     async def create(self, user: User) -> User:
         """사용자 추가 후 flush/refresh로 DB 생성값(타임스탬프 등) 반영. commit은 service가 수행."""
         self.session.add(user)

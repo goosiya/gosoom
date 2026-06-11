@@ -35,7 +35,7 @@
 # - Dev moves story to 'review', then runs code-review (fresh context, different LLM recommended)
 
 generated: 2026-06-08
-last_updated: 2026-06-09 (Epic 1 done — AC2 배포 공동검증 완료, Railway api+user-web 배포)
+last_updated: 2026-06-11 (Story 4-5 done)
 project: gosoom
 project_key: NOKEY
 tracking_system: file-system
@@ -55,27 +55,27 @@ development_status:
   epic-1-retrospective: done
 
   # Epic 2: 고객 서비스 요청 (FR5-7)
-  epic-2: backlog
-  2-1-create-service-request: backlog
-  2-2-my-requests-list-detail: backlog
-  2-3-request-status-management: backlog
+  epic-2: in-progress
+  2-1-create-service-request: done
+  2-2-my-requests-list-detail: done
+  2-3-request-status-management: done
   epic-2-retrospective: optional
 
   # Epic 3: 고수 카테고리 & 견적 (FR9-12)
-  epic-3: backlog
-  3-1-pro-categories-setup: backlog
-  3-2-matched-requests-feed: backlog
-  3-3-submit-quote: backlog
-  3-4-my-quotes-list: backlog
+  epic-3: in-progress
+  3-1-pro-categories-setup: done
+  3-2-matched-requests-feed: done
+  3-3-submit-quote: done
+  3-4-my-quotes-list: done
   epic-3-retrospective: optional
 
   # Epic 4: 매칭 & 채팅 (FR8, FR13-18)
-  epic-4: backlog
-  4-1-compare-quotes: backlog
-  4-2-accept-quote-create-chatroom: backlog
-  4-3-reject-quote: backlog
-  4-4-chat-messaging-polling: backlog
-  4-5-chatroom-list: backlog
+  epic-4: in-progress
+  4-1-compare-quotes: done
+  4-2-accept-quote-create-chatroom: done
+  4-3-reject-quote: done
+  4-4-chat-messaging-polling: done
+  4-5-chatroom-list: done
   epic-4-retrospective: optional
 
   # Epic 5: 모바일 앱 (FR1-18 모바일 전달)

@@ -20,5 +20,9 @@ export {
 export * from './generated/auth/auth';
 export * from './generated/users/users';
 export * from './generated/categories/categories';
+export * from './generated/service-requests/service-requests';
+export * from './generated/pros/pros';
+export * from './generated/quotes/quotes';
+export * from './generated/chat-rooms/chat-rooms';
 export * from './generated/default/default';
 export * from './generated/model';

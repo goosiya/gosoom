@@ -50,6 +50,17 @@ class CategoryRepository:
         )
         return result.scalar_one_or_none()
 
+    async def get_by_id(self, id: UUID) -> Category | None:
+        """id로 활성·미삭제 카테고리 조회. 비활성(is_active=False)도 None 반환(AC2 not found 처리)."""
+        result = await self.session.execute(
+            select(Category).where(
+                Category.id == id,
+                Category.deleted_at.is_(None),
+                Category.is_active.is_(True),
+            )
+        )
+        return result.scalar_one_or_none()
+
     async def create(self, category: Category) -> Category:
         """카테고리 추가 후 flush/refresh로 DB 생성값(타임스탬프 등) 반영. commit은 호출측."""
         self.session.add(category)

@@ -125,3 +125,113 @@ class InvalidCursorError(AppError):
             message="잘못된 커서입니다.",
             status_code=400,
         )
+
+
+class CategoryNotFoundError(AppError):
+    """존재하지 않거나 비활성 카테고리 조회 시(Story 2.1 AC2). 404."""
+
+    def __init__(self) -> None:
+        super().__init__(
+            code="category_not_found",
+            message="카테고리를 찾을 수 없습니다.",
+            status_code=404,
+        )
+
+
+class ServiceRequestNotFoundError(AppError):
+    """존재하지 않거나 삭제된 서비스 요청 조회 시(Story 2.2 AC2). 404."""
+
+    def __init__(self) -> None:
+        super().__init__(
+            code="service_request_not_found",
+            message="요청을 찾을 수 없습니다.",
+            status_code=404,
+        )
+
+
+class InvalidStatusTransitionError(AppError):
+    """허용되지 않는 상태 전이 시도(Story 2.3 AC3). 409."""
+
+    def __init__(self) -> None:
+        super().__init__(
+            code="invalid_status_transition",
+            message="허용되지 않는 상태 전이입니다.",
+            status_code=409,
+        )
+
+
+class InvalidCategoryIdsError(AppError):
+    """존재하지 않거나 비활성 카테고리 ID가 포함된 경우(Story 3.1 AC4). 400."""
+
+    def __init__(self) -> None:
+        super().__init__(
+            code="invalid_category_ids",
+            message="유효하지 않은 카테고리 ID가 포함되어 있습니다.",
+            status_code=400,
+        )
+
+
+class DuplicateQuoteError(AppError):
+    """동일 요청에 이미 견적을 제안한 경우(Story 3.3 AC3). 409."""
+
+    def __init__(self) -> None:
+        super().__init__(
+            code="duplicate_quote",
+            message="이미 이 요청에 견적을 제안했습니다.",
+            status_code=409,
+        )
+
+
+class ServiceRequestNotOpenForQuoteError(AppError):
+    """견적 제안 시 요청이 open 상태가 아닌 경우(Story 3.3 AC4). 409."""
+
+    def __init__(self) -> None:
+        super().__init__(
+            code="service_request_not_open",
+            message="견적 제안은 open 상태의 요청에만 가능합니다.",
+            status_code=409,
+        )
+
+
+class QuoteNotFoundError(AppError):
+    """존재하지 않거나 삭제된 견적 조회 시(Story 4.2 AC3). 404."""
+
+    def __init__(self) -> None:
+        super().__init__(
+            code="quote_not_found",
+            message="견적을 찾을 수 없습니다.",
+            status_code=404,
+        )
+
+
+class QuoteNotPendingError(AppError):
+    """pending이 아닌 견적에 상태 변경(수락/거절)을 시도할 때(Story 4.2 AC3, Story 4.3 AC3). 409."""
+
+    def __init__(self) -> None:
+        super().__init__(
+            code="quote_not_pending",
+            message="pending 상태의 견적만 변경할 수 있습니다.",
+            status_code=409,
+        )
+
+
+class ServiceRequestAlreadyMatchedError(AppError):
+    """이미 matched 상태인 요청의 견적을 수락하려 할 때(Story 4.2 AC3). 409."""
+
+    def __init__(self) -> None:
+        super().__init__(
+            code="service_request_already_matched",
+            message="이미 수락된 견적이 있는 요청입니다.",
+            status_code=409,
+        )
+
+
+class ChatRoomNotFoundError(AppError):
+    """존재하지 않는 채팅방 조회 시(Story 4.4 AC4). 404."""
+
+    def __init__(self) -> None:
+        super().__init__(
+            code="chat_room_not_found",
+            message="채팅방을 찾을 수 없습니다.",
+            status_code=404,
+        )

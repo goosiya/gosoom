@@ -5,7 +5,7 @@ seed_categories를 db_session으로 직접 2회 호출 → DEFAULT_CATEGORIES �
 """
 
 import pytest
-from sqlalchemy import func, select
+from sqlalchemy import delete, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.category import Category
@@ -18,6 +18,8 @@ async def test_seed_categories_creates_default_set(
     db_session: AsyncSession,
 ) -> None:
     """첫 시드 → DEFAULT_CATEGORIES 전체가 활성으로 생성된다(AC2)."""
+    await db_session.execute(delete(Category))
+    await db_session.flush()
     message = await seed_categories(db_session)
     # 메시지 리터럴에 "신규"가 항상 포함되므로 숫자까지 단정해 created 카운트를 실제 검증.
     assert f"신규 {len(DEFAULT_CATEGORIES)}개" in message
@@ -33,6 +35,8 @@ async def test_seed_categories_is_idempotent(
     db_session: AsyncSession,
 ) -> None:
     """시드 2회 실행 → 카테고리는 중복 없이 정확히 DEFAULT_CATEGORIES 집합만 존재(AC2 멱등)."""
+    await db_session.execute(delete(Category))
+    await db_session.flush()
     first = await seed_categories(db_session)
     # 1회차: DEFAULT_CATEGORIES 전부 신규 생성(숫자까지 단정 — 동어반복 회피).
     assert f"신규 {len(DEFAULT_CATEGORIES)}개" in first

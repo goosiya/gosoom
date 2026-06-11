@@ -22,6 +22,10 @@ from app.core.db import get_db
 from app.core.exceptions import AppError
 from app.routers.auth import router as auth_router
 from app.routers.categories import router as categories_router
+from app.routers.chat import router as chat_router
+from app.routers.pros import router as pros_router
+from app.routers.quotes import router as quotes_router
+from app.routers.service_requests import router as service_requests_router
 from app.routers.users import router as users_router
 
 def register_exception_handlers(app: FastAPI) -> None:
@@ -116,3 +120,7 @@ app.include_router(router)
 app.include_router(auth_router)
 app.include_router(users_router)
 app.include_router(categories_router)
+app.include_router(service_requests_router)
+app.include_router(pros_router)
+app.include_router(quotes_router)
+app.include_router(chat_router)
