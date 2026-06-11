@@ -40,10 +40,10 @@ function ChatDetail({ chatRoomId }: { chatRoomId: string }) {
     error: messagesErr,
   } = useListAdminChatMessages(chatRoomId, { limit: 50, before });
 
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     if (!messagesPage?.items) return;
     if (!before) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setAllMessages(messagesPage.items);
     } else {
       setAllMessages((prev) => {
@@ -51,6 +51,7 @@ function ChatDetail({ chatRoomId }: { chatRoomId: string }) {
         return [...messagesPage.items.filter((m) => !existingIds.has(m.id)), ...prev];
       });
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [messagesPage]);
 
   const formatTime = (iso: string) =>

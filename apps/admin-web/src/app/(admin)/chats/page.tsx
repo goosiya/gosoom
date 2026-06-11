@@ -37,19 +37,18 @@ function ChatRoomsTable() {
     cursor,
   });
 
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     if (!data?.items) return;
     if (!cursor) {
       // eslint-disable-next-line react-hooks/set-state-in-effect
       setAllItems(data.items);
     } else {
-      // eslint-disable-next-line react-hooks/set-state-in-effect
       setAllItems((prev) => {
         const existingIds = new Set(prev.map((i) => i.id));
         return [...prev, ...data.items.filter((i) => !existingIds.has(i.id))];
       });
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [data]);
 
   const formatDate = (iso: string) => new Date(iso).toLocaleDateString("ko-KR");

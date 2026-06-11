@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 
 import {
@@ -76,8 +76,8 @@ function UserTable({ role }: { role: "customer" | "pro" }) {
 
   // role 변경 시 상태 초기화
   useEffect(() => {
-    setCursor(undefined);
     // eslint-disable-next-line react-hooks/set-state-in-effect
+    setCursor(undefined);
     setAllItems([]);
   }, [role]);
 
@@ -88,7 +88,6 @@ function UserTable({ role }: { role: "customer" | "pro" }) {
       // eslint-disable-next-line react-hooks/set-state-in-effect
       setAllItems(data.items);
     } else {
-      // eslint-disable-next-line react-hooks/set-state-in-effect
       setAllItems((prev) => {
         const existingIds = new Set(prev.map((i) => i.id));
         const newItems = data.items.filter((i) => !existingIds.has(i.id));
