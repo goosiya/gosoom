@@ -7,11 +7,15 @@ import {
   isAuthenticated,
   setAccessToken,
   setRefreshToken,
+  setStorageBackend,
+  type SyncStorageBackend,
 } from './token-store';
 
 describe('token-store (jsdom)', () => {
   beforeEach(() => {
     clearTokens();
+    // storageBackend를 null로 리셋 — window.localStorage 폴백 경로를 테스트한다.
+    setStorageBackend(null);
   });
 
   it('access 토큰은 메모리에 저장/조회/해제된다', () => {
@@ -56,5 +60,47 @@ describe('token-store (jsdom)', () => {
     setAccessToken(null);
     setRefreshToken('refresh-1');
     expect(isAuthenticated()).toBe(true);
+  });
+});
+
+describe('token-store — setStorageBackend (모바일 어댑터 주입)', () => {
+  beforeEach(() => {
+    clearTokens();
+    // storageBackend를 null로 리셋 — 각 테스트가 독립적으로 모의 백엔드를 주입한다.
+    setStorageBackend(null);
+  });
+
+  it('주입된 백엔드에 refresh 토큰이 읽고 쓰여진다', () => {
+    const store: Record<string, string> = {};
+    const mockBackend: SyncStorageBackend = {
+      getItem: (key) => store[key] ?? null,
+      setItem: (key, value) => { store[key] = value; },
+      removeItem: (key) => { delete store[key]; },
+    };
+    setStorageBackend(mockBackend);
+
+    setRefreshToken('mobile-refresh');
+    expect(store['gosoom.refresh']).toBe('mobile-refresh');
+    expect(getRefreshToken()).toBe('mobile-refresh');
+    // localStorage에는 저장되지 않는다
+    expect(window.localStorage.getItem('gosoom.refresh')).toBeNull();
+  });
+
+  it('주입된 백엔드에서 clearTokens가 refresh를 제거한다', () => {
+    const store: Record<string, string> = {};
+    const mockBackend: SyncStorageBackend = {
+      getItem: (key) => store[key] ?? null,
+      setItem: (key, value) => { store[key] = value; },
+      removeItem: (key) => { delete store[key]; },
+    };
+    setStorageBackend(mockBackend);
+
+    setRefreshToken('mobile-refresh');
+    setAccessToken('mobile-access');
+    clearTokens();
+
+    expect(getAccessToken()).toBeNull();
+    expect(getRefreshToken()).toBeNull();
+    expect(store['gosoom.refresh']).toBeUndefined();
   });
 });

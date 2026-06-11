@@ -6,6 +6,7 @@ export { resolveBaseUrl, setAuthFailureHandler } from './client';
 export type { ApiError, ApiRequestConfig } from './client';
 
 // 토큰 스토어 — 로그인(토큰 저장)/로그아웃(clearTokens)/가드(isAuthenticated) 소비.
+// setStorageBackend: 모바일 앱 부트 시 SecureStore 어댑터 주입(Story 5-1, AC3).
 export {
   clearTokens,
   getAccessToken,
@@ -13,7 +14,9 @@ export {
   isAuthenticated,
   setAccessToken,
   setRefreshToken,
+  setStorageBackend,
 } from './token-store';
+export type { SyncStorageBackend } from './token-store';
 
 // 생성된 TanStack Query 훅 + 모델 타입(useSignup/useLogin/useRefresh/useReadMe/useListCategories 등).
 // orval tags-split는 루트 barrel을 만들지 않으므로 태그별 파일을 명시적으로 re-export(동결 API).

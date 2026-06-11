@@ -103,6 +103,11 @@
 - **백그라운드 refetch 시 `processedCursors`가 최신 데이터 갱신 차단 (Low)** — `apps/user-web/src/app/chat/page.tsx`. TanStack Query 기본 staleTime=0 으로 포커스 복귀 시 refetch가 발생하나 동일 cursor가 Set에 있어 최신 데이터가 `allRooms`에 반영되지 않음. 스토리 노트에 "실시간 갱신 불필요" 명시된 의도적 트레이드오프. 채팅방 목록 실시간 갱신 요구사항 추가 시 재검토.
 - **컴포넌트 unmount/remount 중 inflight fetch 경쟁 조건 (Low)** — `apps/user-web/src/app/chat/page.tsx`. 사용자가 페이지 이동 후 복귀 시 `processedCursors` ref가 초기화되어 이전 inflight 응답이 리마운트 후 도착하면 중복 처리 가능. 목록 페이지 특성상 실질적 사용자 영향 낮음. 상태관리 아키텍처 정비 시 처리.
 
+## Deferred from: code review of 5-1-mobile-shell-auth (2026-06-11)
+
+- **SecureStore 쓰기 실패 시 앱 재시작 후 세션 유실 (Low)** — `apps/mobile/src/features/auth/mobile-storage-backend.ts:14-16`. `setItem`/`removeItem`의 SecureStore 비동기 후기록이 `.catch(() => {})` 로 조용히 실패. 디바이스 잠금·하드웨어 오류 시 메모리 캐시에만 저장되고 영구 저장 실패. 앱 재시작 시 SecureStore에 값이 없어 세션 유실. MVP 범위에서 허용; 디바이스 수준 오류 재시도 또는 사용자 알림 정책 수립 시 처리.
+- **`cache` 모듈 전역 변수 테스트 오염 가능 (Low)** — `apps/mobile/src/features/auth/mobile-storage-backend.ts:10`. `cache`가 모듈 싱글턴이라 단위 테스트에서 `mobileStorageBackend`를 직접 테스트할 경우 테스트 간 상태 누출. 현재 모바일 단위 테스트 미작성 — 테스트 추가 시 `cache` 초기화 수단(내보내기 또는 jest mock) 도입 검토.
+
 ## Deferred from: code review of 3-3-submit-quote (2026-06-09)
 
 - **서비스 레이어 역할 미재검증 (Low)** — `apps/api/app/services/quote.py`. QuoteService.submit()이 라우터 계층의 `require_role(PRO)` 의존성에만 의존하고 서비스 내부에서 `current_user.user_role`을 재확인하지 않는다. 이는 프로젝트 전체 아키텍처 패턴(모든 서비스가 동일). 서비스 레이어를 직접 호출하는 경로가 추가될 경우 역할 검사 우회 가능. 전체 서비스 계층 역할 재검증 정책 수립 시 일괄 처리.
