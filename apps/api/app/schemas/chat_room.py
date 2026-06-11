@@ -33,3 +33,17 @@ class ChatRoomListItem(CamelModel):
 class PageChatRoomListItem(CamelModel):
     items: list[ChatRoomListItem]
     next_cursor: Optional[uuid.UUID] = None
+
+
+class ChatRoomAdminRead(CamelModel):
+    """관리자 전용 채팅방 응답 — 고객·고수 표시명 포함 (Story 6.5)."""
+
+    id: uuid.UUID
+    service_request_id: uuid.UUID
+    customer_id: uuid.UUID
+    pro_id: uuid.UUID
+    quote_id: uuid.UUID
+    created_at: datetime
+    customer_display_name: str
+    pro_display_name: str
+    service_request: Optional[ServiceRequestSummary] = None

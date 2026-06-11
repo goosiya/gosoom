@@ -20,10 +20,15 @@ import type {
 
 import type {
   AdminCreateRequest,
+  ChatRoomAdminRead,
   HTTPValidationError,
+  ListAdminChatMessagesParams,
+  ListAdminChatRoomsParams,
   ListAdminServiceRequestsParams,
   ListAdminUsersParams,
   ListAdminsParams,
+  MessagePageResponse,
+  PageChatRoomAdminRead,
   PageServiceRequestAdminRead,
   PageUserRead,
   ServiceRequestAdminRead,
@@ -690,4 +695,213 @@ export const useAdminHideServiceRequest = <TError = HTTPValidationError,
 
       return useMutation(mutationOptions);
     }
+    /**
+ * @summary List Admin Chat Rooms
+ */
+export const list_admin_chat_rooms = (
+    params?: ListAdminChatRoomsParams,
+ options?: SecondParameter<typeof apiClient>,signal?: AbortSignal
+) => {
+      
+      
+      return apiClient<PageChatRoomAdminRead>(
+      {url: `/api/v1/admin/chat-rooms`, method: 'GET',
+        params, signal
+    },
+      options);
+    }
+  
+
+
+
+export const getListAdminChatRoomsQueryKey = (params?: ListAdminChatRoomsParams,) => {
+    return [
+    `/api/v1/admin/chat-rooms`, ...(params ? [params]: [])
+    ] as const;
+    }
+
     
+export const getListAdminChatRoomsQueryOptions = <TData = Awaited<ReturnType<typeof list_admin_chat_rooms>>, TError = HTTPValidationError>(params?: ListAdminChatRoomsParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof list_admin_chat_rooms>>, TError, TData>, request?: SecondParameter<typeof apiClient>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getListAdminChatRoomsQueryKey(params);
+
+  
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof list_admin_chat_rooms>>> = ({ signal }) => list_admin_chat_rooms(params, requestOptions, signal);
+
+      
+
+      
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof list_admin_chat_rooms>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type ListAdminChatRoomsQueryResult = NonNullable<Awaited<ReturnType<typeof list_admin_chat_rooms>>>
+export type ListAdminChatRoomsQueryError = HTTPValidationError
+
+
+/**
+ * @summary List Admin Chat Rooms
+ */
+
+export function useListAdminChatRooms<TData = Awaited<ReturnType<typeof list_admin_chat_rooms>>, TError = HTTPValidationError>(
+ params?: ListAdminChatRoomsParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof list_admin_chat_rooms>>, TError, TData>, request?: SecondParameter<typeof apiClient>}
+  
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getListAdminChatRoomsQueryOptions(params,options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  query.queryKey = queryOptions.queryKey ;
+
+  return query;
+}
+
+
+
+
+/**
+ * @summary Get Admin Chat Room
+ */
+export const get_admin_chat_room = (
+    chatRoomId: string,
+ options?: SecondParameter<typeof apiClient>,signal?: AbortSignal
+) => {
+      
+      
+      return apiClient<ChatRoomAdminRead>(
+      {url: `/api/v1/admin/chat-rooms/${chatRoomId}`, method: 'GET', signal
+    },
+      options);
+    }
+  
+
+
+
+export const getGetAdminChatRoomQueryKey = (chatRoomId?: string,) => {
+    return [
+    `/api/v1/admin/chat-rooms/${chatRoomId}`
+    ] as const;
+    }
+
+    
+export const getGetAdminChatRoomQueryOptions = <TData = Awaited<ReturnType<typeof get_admin_chat_room>>, TError = HTTPValidationError>(chatRoomId: string, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof get_admin_chat_room>>, TError, TData>, request?: SecondParameter<typeof apiClient>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetAdminChatRoomQueryKey(chatRoomId);
+
+  
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof get_admin_chat_room>>> = ({ signal }) => get_admin_chat_room(chatRoomId, requestOptions, signal);
+
+      
+
+      
+
+   return  { queryKey, queryFn, enabled: !!(chatRoomId), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof get_admin_chat_room>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetAdminChatRoomQueryResult = NonNullable<Awaited<ReturnType<typeof get_admin_chat_room>>>
+export type GetAdminChatRoomQueryError = HTTPValidationError
+
+
+/**
+ * @summary Get Admin Chat Room
+ */
+
+export function useGetAdminChatRoom<TData = Awaited<ReturnType<typeof get_admin_chat_room>>, TError = HTTPValidationError>(
+ chatRoomId: string, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof get_admin_chat_room>>, TError, TData>, request?: SecondParameter<typeof apiClient>}
+  
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetAdminChatRoomQueryOptions(chatRoomId,options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  query.queryKey = queryOptions.queryKey ;
+
+  return query;
+}
+
+
+
+
+/**
+ * @summary List Admin Chat Messages
+ */
+export const list_admin_chat_messages = (
+    chatRoomId: string,
+    params?: ListAdminChatMessagesParams,
+ options?: SecondParameter<typeof apiClient>,signal?: AbortSignal
+) => {
+      
+      
+      return apiClient<MessagePageResponse>(
+      {url: `/api/v1/admin/chat-rooms/${chatRoomId}/messages`, method: 'GET',
+        params, signal
+    },
+      options);
+    }
+  
+
+
+
+export const getListAdminChatMessagesQueryKey = (chatRoomId?: string,
+    params?: ListAdminChatMessagesParams,) => {
+    return [
+    `/api/v1/admin/chat-rooms/${chatRoomId}/messages`, ...(params ? [params]: [])
+    ] as const;
+    }
+
+    
+export const getListAdminChatMessagesQueryOptions = <TData = Awaited<ReturnType<typeof list_admin_chat_messages>>, TError = HTTPValidationError>(chatRoomId: string,
+    params?: ListAdminChatMessagesParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof list_admin_chat_messages>>, TError, TData>, request?: SecondParameter<typeof apiClient>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getListAdminChatMessagesQueryKey(chatRoomId,params);
+
+  
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof list_admin_chat_messages>>> = ({ signal }) => list_admin_chat_messages(chatRoomId,params, requestOptions, signal);
+
+      
+
+      
+
+   return  { queryKey, queryFn, enabled: !!(chatRoomId), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof list_admin_chat_messages>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type ListAdminChatMessagesQueryResult = NonNullable<Awaited<ReturnType<typeof list_admin_chat_messages>>>
+export type ListAdminChatMessagesQueryError = HTTPValidationError
+
+
+/**
+ * @summary List Admin Chat Messages
+ */
+
+export function useListAdminChatMessages<TData = Awaited<ReturnType<typeof list_admin_chat_messages>>, TError = HTTPValidationError>(
+ chatRoomId: string,
+    params?: ListAdminChatMessagesParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof list_admin_chat_messages>>, TError, TData>, request?: SecondParameter<typeof apiClient>}
+  
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getListAdminChatMessagesQueryOptions(chatRoomId,params,options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  query.queryKey = queryOptions.queryKey ;
+
+  return query;
+}
+
+
+
+

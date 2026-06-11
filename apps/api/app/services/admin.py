@@ -15,6 +15,7 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.exceptions import (
+    ChatRoomNotFoundError,
     DuplicateEmailError,
     ForbiddenError,
     InvalidCursorError,
@@ -27,11 +28,15 @@ from app.core.pagination import decode_cursor, encode_cursor
 from app.core.security import hash_password
 from app.models.service_request import ServiceRequestStatus
 from app.models.user import User, UserRole
+from app.repositories.chat_rooms import ChatRoomRepository
+from app.repositories.messages import MessageRepository
 from app.repositories.service_requests import ServiceRequestRepository
 from app.repositories.users import UserRepository
 from app.schemas.auth import AdminCreateRequest, UserRead
+from app.schemas.chat_room import ChatRoomAdminRead
+from app.schemas.message import MessagePageResponse, MessageRead
 from app.schemas.pagination import Page
-from app.schemas.service_request import ServiceRequestAdminRead
+from app.schemas.service_request import ServiceRequestAdminRead, ServiceRequestSummary
 
 
 class AdminUserService:
@@ -228,3 +233,107 @@ class AdminServiceRequestService:
             await self.repo.save(request)
             await self.session.commit()
         return ServiceRequestAdminRead.model_validate(request)
+
+
+class AdminChatService:
+    """채팅 내역 열람 (Story 6.5) — 읽기 전용, 참여자 검사 없는 관리자 전용."""
+
+    def __init__(self, session: AsyncSession) -> None:
+        self.session = session
+        self.chat_room_repo = ChatRoomRepository(session)
+        self.message_repo = MessageRepository(session)
+
+    async def list_chat_rooms(
+        self,
+        cursor: str | None,
+        limit: int,
+    ) -> "Page[ChatRoomAdminRead]":
+        """전체 채팅방 목록 조회 — cursor id DESC 페이지네이션 + 참여자 이름 포함."""
+        if limit < 1:
+            raise ValueError("limit must be >= 1")
+        after_id: UUID | None = None
+        if cursor:
+            try:
+                after_id = UUID(decode_cursor(cursor))
+            except (ValueError, AttributeError) as exc:
+                raise InvalidCursorError() from exc
+        rooms = await self.chat_room_repo.list_all(after_id, limit + 1)
+        has_more = len(rooms) > limit
+        page = rooms[:limit]
+
+        if not page:
+            return Page(items=[], next_cursor=None)
+
+        next_cursor = encode_cursor(str(page[-1].id)) if has_more else None
+
+        user_repo = UserRepository(self.session)
+        sr_repo = ServiceRequestRepository(self.session)
+
+        all_user_ids = list({r.customer_id for r in page} | {r.pro_id for r in page})
+        sr_ids = [r.service_request_id for r in page]
+
+        users = {u.id: u for u in await user_repo.list_by_ids(all_user_ids)}
+        srs = {sr.id: sr for sr in await sr_repo.list_by_ids(sr_ids)}
+
+        items = []
+        for room in page:
+            customer = users.get(room.customer_id)
+            pro = users.get(room.pro_id)
+            sr = srs.get(room.service_request_id)
+            items.append(
+                ChatRoomAdminRead(
+                    id=room.id,
+                    service_request_id=room.service_request_id,
+                    customer_id=room.customer_id,
+                    pro_id=room.pro_id,
+                    quote_id=room.quote_id,
+                    created_at=room.created_at,
+                    customer_display_name=customer.display_name if customer else "알 수 없음",
+                    pro_display_name=pro.display_name if pro else "알 수 없음",
+                    service_request=ServiceRequestSummary.model_validate(sr) if sr else None,
+                )
+            )
+        return Page(items=items, next_cursor=next_cursor)
+
+    async def get_chat_room(self, chat_room_id: UUID) -> ChatRoomAdminRead:
+        """채팅방 단건 조회 — 참여자 표시명 포함 (관리자 전용)."""
+        room = await self.chat_room_repo.get_by_id(chat_room_id)
+        if room is None:
+            raise ChatRoomNotFoundError()
+        user_repo = UserRepository(self.session)
+        sr_repo = ServiceRequestRepository(self.session)
+        users = {u.id: u for u in await user_repo.list_by_ids([room.customer_id, room.pro_id])}
+        customer = users.get(room.customer_id)
+        pro = users.get(room.pro_id)
+        sr_list = await sr_repo.list_by_ids([room.service_request_id])
+        sr = sr_list[0] if sr_list else None
+        return ChatRoomAdminRead(
+            id=room.id,
+            service_request_id=room.service_request_id,
+            customer_id=room.customer_id,
+            pro_id=room.pro_id,
+            quote_id=room.quote_id,
+            created_at=room.created_at,
+            customer_display_name=customer.display_name if customer else "알 수 없음",
+            pro_display_name=pro.display_name if pro else "알 수 없음",
+            service_request=ServiceRequestSummary.model_validate(sr) if sr else None,
+        )
+
+    async def list_messages(
+        self,
+        chat_room_id: UUID,
+        before_id: UUID | None,
+        limit: int,
+    ) -> "MessagePageResponse":
+        """채팅방 메시지 목록 조회 — before cursor 페이지네이션, 관리자 전용."""
+        room = await self.chat_room_repo.get_by_id(chat_room_id)
+        if room is None:
+            raise ChatRoomNotFoundError()
+        msgs = await self.message_repo.list_before(chat_room_id, before_id, limit + 1)
+        has_more = len(msgs) > limit
+        page = msgs[1:] if has_more else msgs
+        next_cursor = page[0].id if has_more else None
+        return MessagePageResponse(
+            items=[MessageRead.model_validate(m) for m in page],
+            next_cursor=next_cursor,
+        )

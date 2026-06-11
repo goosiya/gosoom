@@ -28,6 +28,19 @@ class ChatRoomRepository:
         """PK로 채팅방 단건 조회."""
         return await self.session.get(ChatRoom, chat_room_id)
 
+    async def list_all(
+        self,
+        after_id: uuid.UUID | None,
+        limit: int,
+    ) -> list[ChatRoom]:
+        """모든 채팅방 조회 (관리자 전용). id DESC cursor 페이지네이션."""
+        stmt = select(ChatRoom)
+        if after_id is not None:
+            stmt = stmt.where(ChatRoom.id < after_id)
+        stmt = stmt.order_by(ChatRoom.id.desc()).limit(limit)
+        result = await self.session.execute(stmt)
+        return list(result.scalars().all())
+
     async def list_mine(
         self,
         user_id: uuid.UUID,

@@ -14,8 +14,10 @@ from app.deps import require_role
 from app.models.user import UserRole
 from app.schemas.auth import AdminCreateRequest, UserRead
 from app.schemas.pagination import Page
+from app.schemas.chat_room import ChatRoomAdminRead
+from app.schemas.message import MessagePageResponse
 from app.schemas.service_request import ServiceRequestAdminRead, ServiceRequestStatusUpdate
-from app.services.admin import AdminServiceRequestService, AdminUserService
+from app.services.admin import AdminChatService, AdminServiceRequestService, AdminUserService
 
 router = APIRouter(
     prefix="/api/v1/admin",
@@ -108,3 +110,30 @@ async def admin_hide_service_request(
     db: AsyncSession = Depends(get_db),
 ) -> ServiceRequestAdminRead:
     return await AdminServiceRequestService(db).hide_request(request_id)
+
+
+@router.get("/chat-rooms", response_model=Page[ChatRoomAdminRead])
+async def list_admin_chat_rooms(
+    cursor: str | None = Query(None),
+    limit: int = Query(20, ge=1, le=100),
+    db: AsyncSession = Depends(get_db),
+) -> Page[ChatRoomAdminRead]:
+    return await AdminChatService(db).list_chat_rooms(cursor, limit)
+
+
+@router.get("/chat-rooms/{chat_room_id}", response_model=ChatRoomAdminRead)
+async def get_admin_chat_room(
+    chat_room_id: UUID,
+    db: AsyncSession = Depends(get_db),
+) -> ChatRoomAdminRead:
+    return await AdminChatService(db).get_chat_room(chat_room_id)
+
+
+@router.get("/chat-rooms/{chat_room_id}/messages", response_model=MessagePageResponse)
+async def list_admin_chat_messages(
+    chat_room_id: UUID,
+    before: UUID | None = Query(None),
+    limit: int = Query(50, ge=1, le=200),
+    db: AsyncSession = Depends(get_db),
+) -> MessagePageResponse:
+    return await AdminChatService(db).list_messages(chat_room_id, before, limit)

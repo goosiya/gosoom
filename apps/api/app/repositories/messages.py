@@ -24,6 +24,21 @@ class MessageRepository:
         await self.session.refresh(obj)
         return obj
 
+    async def list_before(
+        self,
+        chat_room_id: uuid.UUID,
+        before_id: uuid.UUID | None,
+        limit: int = 50,
+    ) -> list[Message]:
+        """관리자 전용: before_id보다 이전(오래된) 메시지를 limit개 조회. ASC 순서 반환."""
+        stmt = select(Message).where(Message.chat_room_id == chat_room_id)
+        if before_id is not None:
+            stmt = stmt.where(Message.id < before_id)
+        stmt = stmt.order_by(Message.id.desc()).limit(limit)
+        result = await self.session.execute(stmt)
+        msgs = list(result.scalars().all())
+        return list(reversed(msgs))
+
     async def list_after(
         self,
         chat_room_id: uuid.UUID,

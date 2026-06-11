@@ -2,6 +2,7 @@
 
 import uuid
 from datetime import datetime
+from typing import Optional
 
 from pydantic import Field
 
@@ -22,3 +23,10 @@ class MessageRead(CamelModel):
 
 class MessageListResponse(CamelModel):
     items: list[MessageRead]
+
+
+class MessagePageResponse(CamelModel):
+    """관리자 전용 메시지 페이지 응답 — before cursor 포함 (Story 6.5 patch)."""
+
+    items: list[MessageRead]
+    next_cursor: Optional[uuid.UUID] = None

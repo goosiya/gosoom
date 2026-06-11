@@ -161,3 +161,9 @@
 
 - **`change_status` TOCTOU 경쟁 조건** — `apps/api/app/services/admin.py`. 두 관리자가 동시에 같은 요청 상태를 변경할 경우 last-write-wins 구조로 최종 상태가 비결정적. `get_by_id_any`에 `SELECT FOR UPDATE` 적용이 필요하지만 프로젝트 전반 인프라 변경(lock strategy)이 수반되므로 현 스코프 밖.
 - **서비스-리포지토리 이중 commit 패턴** — `apps/api/app/services/admin.py`. `repo.save()` + `session.commit()` 이중 계층 구조. 여러 repo 작업을 단일 트랜잭션으로 묶어야 할 때 구조적 문제 유발 가능. 기존 `AdminUserService`와 동일 패턴이므로 프로젝트 전반 리팩토링 시 함께 처리.
+
+
+## Deferred from: code review of 6-5-chat-history-readonly (2026-06-12)
+
+- **`useEffect` deps에서 `cursor` 제외** — `apps/admin-web/src/app/(admin)/chats/page.tsx`. `// eslint-disable-next-line react-hooks/exhaustive-deps`로 cursor를 deps에서 제외. 6.2~6.4 기존 패턴과 일관성 유지. background refetch 시 allItems 초기화 위험은 React Query의 queryKey 격리로 실질적으로 완화됨.
+- **UUID7 기반 cursor 페이지네이션** — `apps/api/app/repositories/chat_rooms.py`. `ChatRoom.id < after_id` 비교는 UUID7 단조성에 의존. 프로젝트 전반 기존 패턴(6.2~6.4)과 동일, ID 전략 변경 시 함께 처리.
