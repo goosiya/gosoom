@@ -11,7 +11,7 @@ import {
   useSignup,
 } from '@gosoom/api-client';
 import { router } from 'expo-router';
-import React, { createContext, useContext, useEffect, useState } from 'react';
+import React, { createContext, useContext, useEffect, useReducer } from 'react';
 
 interface AuthUser {
   id: string;
@@ -40,20 +40,52 @@ interface AuthProviderProps {
   isHydrated: boolean;
 }
 
+type AuthState = {
+  user: AuthUser | null;
+  isLoading: boolean;
+  shouldFetchMe: boolean;
+};
+
+type AuthAction =
+  | { type: 'HYDRATE_NO_TOKEN' }
+  | { type: 'HYDRATE_HAS_TOKEN' }
+  | { type: 'ME_SUCCESS'; user: AuthUser }
+  | { type: 'ME_FAILURE' }
+  | { type: 'LOGIN_TRIGGER' }
+  | { type: 'LOGOUT' };
+
+const initialState: AuthState = { user: null, isLoading: true, shouldFetchMe: false };
+
+function authReducer(state: AuthState, action: AuthAction): AuthState {
+  switch (action.type) {
+    case 'HYDRATE_NO_TOKEN':
+      return { ...state, isLoading: false };
+    case 'HYDRATE_HAS_TOKEN':
+      return { ...state, shouldFetchMe: true };
+    case 'ME_SUCCESS':
+      return { user: action.user, isLoading: false, shouldFetchMe: false };
+    case 'ME_FAILURE':
+      return { user: null, isLoading: false, shouldFetchMe: false };
+    case 'LOGIN_TRIGGER':
+      return { ...state, shouldFetchMe: true };
+    case 'LOGOUT':
+      return { user: null, isLoading: false, shouldFetchMe: false };
+    default:
+      return state;
+  }
+}
+
 export function AuthProvider({ children, isHydrated }: AuthProviderProps) {
   const queryClient = useQueryClient();
-  const [user, setUser] = useState<AuthUser | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [shouldFetchMe, setShouldFetchMe] = useState(false);
+  const [{ user, isLoading, shouldFetchMe }, dispatch] = useReducer(authReducer, initialState);
 
   // 수화 완료 시: 기존 세션 복원 여부 확인
   useEffect(() => {
     if (!isHydrated) return;
     if (isAuthenticated()) {
-      // SecureStore에서 복원된 refresh 토큰이 있음 → /me 조회로 세션 복원 시도
-      setShouldFetchMe(true);
+      dispatch({ type: 'HYDRATE_HAS_TOKEN' });
     } else {
-      setIsLoading(false);
+      dispatch({ type: 'HYDRATE_NO_TOKEN' });
     }
   }, [isHydrated]);
 
@@ -76,36 +108,27 @@ export function AuthProvider({ children, isHydrated }: AuthProviderProps) {
       : null;
 
     if (!role) {
-      setUser(null);
-      setIsLoading(false);
-      setShouldFetchMe(false);
+      dispatch({ type: 'ME_FAILURE' });
       return;
     }
 
-    setUser({
-      id: meData.id,
-      role,
-      displayName: meData.displayName,
+    dispatch({
+      type: 'ME_SUCCESS',
+      user: { id: meData.id, role, displayName: meData.displayName },
     });
-    setIsLoading(false);
-    setShouldFetchMe(false);
   }, [meData]);
 
   // /me 실패(네트워크 오류 등) → 미인증으로 처리
   useEffect(() => {
     if (!meIsError || !shouldFetchMe) return;
-    setUser(null);
-    setIsLoading(false);
-    setShouldFetchMe(false);
+    dispatch({ type: 'ME_FAILURE' });
   }, [meIsError, shouldFetchMe]);
 
   // refresh 실패 → 로그아웃 + 로그인 화면으로 이동 (인터셉터에서 호출)
   // 언마운트 시 no-op으로 교체 — stale 클로저 방지 (P6)
   useEffect(() => {
     setAuthFailureHandler(() => {
-      setUser(null);
-      setIsLoading(false);
-      setShouldFetchMe(false);
+      dispatch({ type: 'ME_FAILURE' });
       router.replace('/(auth)/login');
     });
     return () => {
@@ -122,7 +145,7 @@ export function AuthProvider({ children, isHydrated }: AuthProviderProps) {
     setRefreshToken(tokens.refreshToken);
     // 이전 세션 /me 캐시 제거 — 재로그인 시 stale 데이터 트리거 방지 (P3)
     queryClient.resetQueries({ queryKey: getReadMeQueryKey() });
-    setShouldFetchMe(true);
+    dispatch({ type: 'LOGIN_TRIGGER' });
   };
 
   const signup = async (
@@ -138,8 +161,7 @@ export function AuthProvider({ children, isHydrated }: AuthProviderProps) {
     clearTokens();
     // /me 캐시 제거 — 재로그인 시 이전 사용자 정보 노출 방지 (P3)
     queryClient.resetQueries({ queryKey: getReadMeQueryKey() });
-    setUser(null);
-    setShouldFetchMe(false);
+    dispatch({ type: 'LOGOUT' });
     router.replace('/(auth)/login');
   };
 
