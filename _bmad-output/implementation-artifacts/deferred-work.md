@@ -118,6 +118,11 @@
 ## Deferred from: code review of 3-3-submit-quote (2026-06-09)
 
 - **서비스 레이어 역할 미재검증 (Low)** — `apps/api/app/services/quote.py`. QuoteService.submit()이 라우터 계층의 `require_role(PRO)` 의존성에만 의존하고 서비스 내부에서 `current_user.user_role`을 재확인하지 않는다. 이는 프로젝트 전체 아키텍처 패턴(모든 서비스가 동일). 서비스 레이어를 직접 호출하는 경로가 추가될 경우 역할 검사 우회 가능. 전체 서비스 계층 역할 재검증 정책 수립 시 일괄 처리.
+
+## Deferred from: code review of 5-3-mobile-pro-flow (2026-06-11)
+
+- **DEF1 — budget=0 표시 모호성 (Low)** — `apps/mobile/src/app/(pro)/feed/[id].tsx`. `budget != null` 체크로 budget=0인 경우 "0원"으로 표시됨. API 계약상 null이 "설정 안 함"이고 0이 실제 0원 예산인지 불명확. API 스키마에 명시적 최솟값 제약이 없어 현재 결정 불가. 서비스 요청 예산 정책 명확화 시 처리.
+- **DEF2 — 소수점 금액 검증 없음 (Low)** — `apps/mobile/src/app/(pro)/feed/[id].tsx:70-74`. "50000.5" 입력 시 검증 통과, API로 float 전송. DB 컬럼 타입에 따라 백엔드가 500 반환 가능. `keyboardType="numeric"`은 플랫폼에 따라 소수점 입력을 허용할 수 있음. 백엔드 DB 스키마의 integer 제약 확인 후 클라이언트 `Number.isInteger()` 검증 추가 여부 결정.
 - **프론트 에러 메시지 원시 노출 (Low)** — `apps/user-web/src/app/(pro)/feed/[id]/page.tsx:104`. `(submitQuote.error as Error)?.message`를 직접 렌더링. api-client 인터셉터가 서버 응답 envelope의 message를 Error.message에 매핑하는 경우 안전하나, 미매핑 시 raw HTTP 에러 문자열이 노출될 수 있음. api-client 에러 처리 아키텍처 정비 시 처리.
 - **status cancelled/closed 등 상태 UI 안내 없음 (Low)** — `apps/user-web/src/app/(pro)/feed/[id]/page.tsx`. open/matched 외 상태(cancelled, completed 등)일 때 아무 메시지도 표시되지 않음. 현재 피드 API가 이 상태들을 필터링하므로 실제 노출 불가. 피드 필터 정책 변경 또는 UX 개선 시 처리.
 - **프론트 더블 제출 (Low)** — `apps/user-web/src/app/(pro)/feed/[id]/page.tsx`. isPending 전환 전 두 번째 클릭이 발생하면 두 번째 요청은 409 DuplicateQuoteError를 받아 에러 표시. 서버는 올바르게 처리하나 UX 혼란. 서버 보호로 데이터 무결성은 유지됨. 폼 제출 비활성화 UX 개선 시 처리.
