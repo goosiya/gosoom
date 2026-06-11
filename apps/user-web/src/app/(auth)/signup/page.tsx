@@ -48,95 +48,106 @@ export default function SignupPage() {
         </CardHeader>
 
         <CardContent className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="displayName">표시명</Label>
-            <Input
-              id="displayName"
-              value={displayName}
-              onChange={(e) => setDisplayName(e.target.value)}
-              placeholder="홍길동"
-              disabled={signup.isPending}
-            />
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="email">이메일</Label>
-            <Input
-              id="email"
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="example@email.com"
-              disabled={signup.isPending}
-            />
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="password">비밀번호</Label>
-            <Input
-              id="password"
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              placeholder="8자 이상"
-              disabled={signup.isPending}
-            />
-          </div>
-
-          {/* 역할 선택 */}
-          <div className="space-y-2">
-            <Label>가입 유형</Label>
-            <div className="grid grid-cols-2 gap-3">
-              <label
-                className={`flex items-center justify-center gap-2 rounded-md border p-3 cursor-pointer text-sm transition-colors ${
-                  role === "customer"
-                    ? "border-primary bg-primary/5 text-primary font-medium"
-                    : "border-border hover:bg-muted text-muted-foreground"
-                } ${signup.isPending ? "pointer-events-none opacity-50" : ""}`}
-              >
-                <input
-                  type="radio"
-                  name="role"
-                  value="customer"
-                  checked={role === "customer"}
-                  onChange={() => setRole("customer")}
-                  className="sr-only"
-                />
-                고객
-              </label>
-              <label
-                className={`flex items-center justify-center gap-2 rounded-md border p-3 cursor-pointer text-sm transition-colors ${
-                  role === "pro"
-                    ? "border-primary bg-primary/5 text-primary font-medium"
-                    : "border-border hover:bg-muted text-muted-foreground"
-                } ${signup.isPending ? "pointer-events-none opacity-50" : ""}`}
-              >
-                <input
-                  type="radio"
-                  name="role"
-                  value="pro"
-                  checked={role === "pro"}
-                  onChange={() => setRole("pro")}
-                  className="sr-only"
-                />
-                고수
-              </label>
-            </div>
-          </div>
-
-          {signup.error && (
-            <p className="text-sm text-destructive" role="alert">
-              {signup.error.message}
-            </p>
-          )}
-
-          <Button
-            className="w-full"
-            disabled={!canSubmit}
-            onClick={handleSubmit}
+          <form
+            onSubmit={(e) => { e.preventDefault(); handleSubmit(); }}
+            className="space-y-4"
           >
-            {signup.isPending ? "가입 중…" : "가입하기"}
-          </Button>
+            <div className="space-y-2">
+              <Label htmlFor="displayName">표시명</Label>
+              <Input
+                id="displayName"
+                name="displayName"
+                autoComplete="name"
+                value={displayName}
+                onChange={(e) => setDisplayName(e.target.value)}
+                placeholder="홍길동"
+                disabled={signup.isPending}
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="email">이메일</Label>
+              <Input
+                id="email"
+                name="email"
+                type="email"
+                autoComplete="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="example@email.com"
+                disabled={signup.isPending}
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="password">비밀번호</Label>
+              <Input
+                id="password"
+                name="password"
+                type="password"
+                autoComplete="new-password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="8자 이상"
+                disabled={signup.isPending}
+              />
+            </div>
+
+            {/* 역할 선택 */}
+            <div className="space-y-2">
+              <Label>가입 유형</Label>
+              <div className="grid grid-cols-2 gap-3">
+                <label
+                  className={`flex items-center justify-center gap-2 rounded-md border p-3 cursor-pointer text-sm transition-colors ${
+                    role === "customer"
+                      ? "border-primary bg-primary/5 text-primary font-medium"
+                      : "border-border hover:bg-muted text-muted-foreground"
+                  } ${signup.isPending ? "pointer-events-none opacity-50" : ""}`}
+                >
+                  <input
+                    type="radio"
+                    name="role"
+                    value="customer"
+                    checked={role === "customer"}
+                    onChange={() => setRole("customer")}
+                    className="sr-only"
+                  />
+                  고객
+                </label>
+                <label
+                  className={`flex items-center justify-center gap-2 rounded-md border p-3 cursor-pointer text-sm transition-colors ${
+                    role === "pro"
+                      ? "border-primary bg-primary/5 text-primary font-medium"
+                      : "border-border hover:bg-muted text-muted-foreground"
+                  } ${signup.isPending ? "pointer-events-none opacity-50" : ""}`}
+                >
+                  <input
+                    type="radio"
+                    name="role"
+                    value="pro"
+                    checked={role === "pro"}
+                    onChange={() => setRole("pro")}
+                    className="sr-only"
+                  />
+                  고수
+                </label>
+              </div>
+            </div>
+
+            {signup.error && (
+              <p className="text-sm text-destructive" role="alert">
+                {signup.error.message}
+              </p>
+            )}
+
+            <Button
+              type="submit"
+              className="w-full"
+              disabled={!canSubmit}
+            >
+              {signup.isPending ? "가입 중…" : "가입하기"}
+            </Button>
+          </form>
 
           <p className="text-center text-sm text-muted-foreground">
             이미 계정이 있으신가요?{" "}

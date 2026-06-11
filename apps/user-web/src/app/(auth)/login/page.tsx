@@ -52,45 +52,52 @@ function LoginForm() {
           </p>
         )}
 
-        <div className="space-y-2">
-          <Label htmlFor="email">이메일</Label>
-          <Input
-            id="email"
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            placeholder="example@email.com"
-            disabled={login.isPending}
-            onKeyDown={(e) => e.key === "Enter" && handleSubmit()}
-          />
-        </div>
-
-        <div className="space-y-2">
-          <Label htmlFor="password">비밀번호</Label>
-          <Input
-            id="password"
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            placeholder="••••••••"
-            disabled={login.isPending}
-            onKeyDown={(e) => e.key === "Enter" && handleSubmit()}
-          />
-        </div>
-
-        {login.error && (
-          <p className="text-sm text-destructive" role="alert">
-            {login.error.message}
-          </p>
-        )}
-
-        <Button
-          className="w-full"
-          disabled={!canSubmit}
-          onClick={handleSubmit}
+        <form
+          onSubmit={(e) => { e.preventDefault(); handleSubmit(); }}
+          className="space-y-4"
         >
-          {login.isPending ? "로그인 중…" : "로그인"}
-        </Button>
+          <div className="space-y-2">
+            <Label htmlFor="email">이메일</Label>
+            <Input
+              id="email"
+              name="email"
+              type="email"
+              autoComplete="username"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="example@email.com"
+              disabled={login.isPending}
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="password">비밀번호</Label>
+            <Input
+              id="password"
+              name="password"
+              type="password"
+              autoComplete="current-password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="••••••••"
+              disabled={login.isPending}
+            />
+          </div>
+
+          {login.error && (
+            <p className="text-sm text-destructive" role="alert">
+              {login.error.message}
+            </p>
+          )}
+
+          <Button
+            type="submit"
+            className="w-full"
+            disabled={!canSubmit}
+          >
+            {login.isPending ? "로그인 중…" : "로그인"}
+          </Button>
+        </form>
 
         <p className="text-center text-sm text-muted-foreground">
           계정이 없으신가요?{" "}

@@ -108,6 +108,13 @@
 - **SecureStore 쓰기 실패 시 앱 재시작 후 세션 유실 (Low)** — `apps/mobile/src/features/auth/mobile-storage-backend.ts:14-16`. `setItem`/`removeItem`의 SecureStore 비동기 후기록이 `.catch(() => {})` 로 조용히 실패. 디바이스 잠금·하드웨어 오류 시 메모리 캐시에만 저장되고 영구 저장 실패. 앱 재시작 시 SecureStore에 값이 없어 세션 유실. MVP 범위에서 허용; 디바이스 수준 오류 재시도 또는 사용자 알림 정책 수립 시 처리.
 - **`cache` 모듈 전역 변수 테스트 오염 가능 (Low)** — `apps/mobile/src/features/auth/mobile-storage-backend.ts:10`. `cache`가 모듈 싱글턴이라 단위 테스트에서 `mobileStorageBackend`를 직접 테스트할 경우 테스트 간 상태 누출. 현재 모바일 단위 테스트 미작성 — 테스트 추가 시 `cache` 초기화 수단(내보내기 또는 jest mock) 도입 검토.
 
+## Deferred from: code review of 5-2-mobile-customer-flow (2026-06-11)
+
+- **`id`가 배열로 파싱될 수 있음 (Low)** — `apps/mobile/src/app/(customer)/requests/[id].tsx`. `useLocalSearchParams<{ id: string }>`는 타입 단언이며 expo-router는 이론적으로 `string | string[]`을 반환 가능. 실제로 단일 동적 세그먼트는 항상 string을 반환하는 expo-router 표준 패턴이라 현재 위험 없음. expo-router 버전 업그레이드 시 행동 변경 여부 확인.
+- **budget `parseInt` 소수점/비정형 입력 수락 (Low)** — `apps/mobile/src/app/(customer)/requests/new.tsx`. `parseInt("123.99") = 123`, `parseInt("50abc") = 50`으로 의도치 않은 값이 전달될 수 있음. `keyboardType="numeric"`으로 iOS/Android 표준 숫자 키보드가 강제되어 실제 입력 불가. 향후 예산 필드에 더 엄격한 검증이 필요할 때 `Number()` + 정규식으로 개선.
+- **`formatDate` Invalid Date 표시 가능성 (Low)** — `apps/mobile/src/app/(customer)/requests/[id].tsx`. `new Date(iso).toLocaleDateString()`가 유효하지 않은 ISO 문자열에서 "Invalid Date"를 출력함. API 반환값이 ISO 8601 형식을 보장하므로 현재 도달 불가능. API 계약 변경 시 확인.
+- **background refetch 후 `allItems` 미갱신 (Low)** — `apps/mobile/src/app/(customer)/requests/index.tsx`. TanStack Query의 background refetch 시 `processedCursors`에 해당 cursor가 있으면 갱신된 데이터가 `allItems`에 반영되지 않음. pull-to-refresh로 해결 가능. MVP 단계 허용 가능한 동작; 실시간 동기화 요구사항 추가 시 processedCursors 제거 및 단순 data.items 직접 사용으로 전환.
+
 ## Deferred from: code review of 3-3-submit-quote (2026-06-09)
 
 - **서비스 레이어 역할 미재검증 (Low)** — `apps/api/app/services/quote.py`. QuoteService.submit()이 라우터 계층의 `require_role(PRO)` 의존성에만 의존하고 서비스 내부에서 `current_user.user_role`을 재확인하지 않는다. 이는 프로젝트 전체 아키텍처 패턴(모든 서비스가 동일). 서비스 레이어를 직접 호출하는 경로가 추가될 경우 역할 검사 우회 가능. 전체 서비스 계층 역할 재검증 정책 수립 시 일괄 처리.
