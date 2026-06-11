@@ -14,7 +14,8 @@ from app.deps import require_role
 from app.models.user import UserRole
 from app.schemas.auth import AdminCreateRequest, UserRead
 from app.schemas.pagination import Page
-from app.services.admin import AdminUserService
+from app.schemas.service_request import ServiceRequestAdminRead, ServiceRequestStatusUpdate
+from app.services.admin import AdminServiceRequestService, AdminUserService
 
 router = APIRouter(
     prefix="/api/v1/admin",
@@ -80,3 +81,30 @@ async def deactivate_admin(
     db: AsyncSession = Depends(get_db),
 ) -> UserRead:
     return await AdminUserService(db).deactivate_admin(admin_id)
+
+
+@router.get("/service-requests", response_model=Page[ServiceRequestAdminRead])
+async def list_admin_service_requests(
+    cursor: str | None = Query(None),
+    limit: int = Query(20, ge=1, le=100),
+    include_hidden: bool = Query(False),
+    db: AsyncSession = Depends(get_db),
+) -> Page[ServiceRequestAdminRead]:
+    return await AdminServiceRequestService(db).list_requests(cursor, limit, include_hidden)
+
+
+@router.post("/service-requests/{request_id}/change-status", response_model=ServiceRequestAdminRead)
+async def admin_change_service_request_status(
+    request_id: UUID,
+    data: ServiceRequestStatusUpdate,
+    db: AsyncSession = Depends(get_db),
+) -> ServiceRequestAdminRead:
+    return await AdminServiceRequestService(db).change_status(request_id, data.action)
+
+
+@router.post("/service-requests/{request_id}/hide", response_model=ServiceRequestAdminRead)
+async def admin_hide_service_request(
+    request_id: UUID,
+    db: AsyncSession = Depends(get_db),
+) -> ServiceRequestAdminRead:
+    return await AdminServiceRequestService(db).hide_request(request_id)

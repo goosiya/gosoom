@@ -156,3 +156,8 @@
 
 - **이중 비활성화/재활성화 무응답** — `services/admin.py:deactivate_user/activate_user`. 이미 비활성 계정 재비활성화 또는 이미 활성 계정 재활성화 시 에러 없이 DB write 수행. REST 멱등성 관례상 허용 범위이나 AC2/AC3 문구("활성 계정을", "비활성화된 계정을")와 불일치. 상태 전이 엄밀성이 필요할 경우 ConflictError(409) 반환 추가 검토.
 - **commit 후 model_validate async 위험** — `services/admin.py:deactivate_user/activate_user`. `save()`(flush+refresh) → `session.commit()` → `UserRead.model_validate(user)` 순서에서, SQLAlchemy 기본 `expire_on_commit=True` 설정 시 commit 후 user 속성 접근이 async lazy load를 유발해 MissingGreenlet 오류 가능. 프로젝트의 다른 서비스가 동일 패턴을 사용하므로 세션 설정(`expire_on_commit` 값) 확인 필요. 문제 발생 시 `commit()` 이후 `await session.refresh(user)` 추가 또는 model_validate를 commit 전에 호출하는 방식으로 수정.
+
+## Deferred from: code review of 6-4-service-request-management (2026-06-12)
+
+- **`change_status` TOCTOU 경쟁 조건** — `apps/api/app/services/admin.py`. 두 관리자가 동시에 같은 요청 상태를 변경할 경우 last-write-wins 구조로 최종 상태가 비결정적. `get_by_id_any`에 `SELECT FOR UPDATE` 적용이 필요하지만 프로젝트 전반 인프라 변경(lock strategy)이 수반되므로 현 스코프 밖.
+- **서비스-리포지토리 이중 commit 패턴** — `apps/api/app/services/admin.py`. `repo.save()` + `session.commit()` 이중 계층 구조. 여러 repo 작업을 단일 트랜잭션으로 묶어야 할 때 구조적 문제 유발 가능. 기존 `AdminUserService`와 동일 패턴이므로 프로젝트 전반 리팩토링 시 함께 처리.

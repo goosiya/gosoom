@@ -4,17 +4,13 @@
  * gosoom API
  * OpenAPI spec version: 0.0.0
  */
-import type { UserRole } from './userRole';
 
-export type ListAdminUsersParams = {
-/**
- * customer 또는 pro (admin 불허 — 관리자 목록은 GET /admins 사용)
- */
-role: UserRole;
+export type ListAdminServiceRequestsParams = {
 cursor?: string | null;
 /**
  * @minimum 1
  * @maximum 100
  */
 limit?: number;
+include_hidden?: boolean;
 };

@@ -21,9 +21,13 @@ import type {
 import type {
   AdminCreateRequest,
   HTTPValidationError,
+  ListAdminServiceRequestsParams,
   ListAdminUsersParams,
   ListAdminsParams,
+  PageServiceRequestAdminRead,
   PageUserRead,
+  ServiceRequestAdminRead,
+  ServiceRequestStatusUpdate,
   UserRead
 } from '.././model';
 
@@ -487,6 +491,202 @@ export const useDeactivateAdmin = <TError = HTTPValidationError,
       > => {
 
       const mutationOptions = getDeactivateAdminMutationOptions(options);
+
+      return useMutation(mutationOptions);
+    }
+    /**
+ * @summary List Admin Service Requests
+ */
+export const list_admin_service_requests = (
+    params?: ListAdminServiceRequestsParams,
+ options?: SecondParameter<typeof apiClient>,signal?: AbortSignal
+) => {
+      
+      
+      return apiClient<PageServiceRequestAdminRead>(
+      {url: `/api/v1/admin/service-requests`, method: 'GET',
+        params, signal
+    },
+      options);
+    }
+  
+
+
+
+export const getListAdminServiceRequestsQueryKey = (params?: ListAdminServiceRequestsParams,) => {
+    return [
+    `/api/v1/admin/service-requests`, ...(params ? [params]: [])
+    ] as const;
+    }
+
+    
+export const getListAdminServiceRequestsQueryOptions = <TData = Awaited<ReturnType<typeof list_admin_service_requests>>, TError = HTTPValidationError>(params?: ListAdminServiceRequestsParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof list_admin_service_requests>>, TError, TData>, request?: SecondParameter<typeof apiClient>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getListAdminServiceRequestsQueryKey(params);
+
+  
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof list_admin_service_requests>>> = ({ signal }) => list_admin_service_requests(params, requestOptions, signal);
+
+      
+
+      
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof list_admin_service_requests>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type ListAdminServiceRequestsQueryResult = NonNullable<Awaited<ReturnType<typeof list_admin_service_requests>>>
+export type ListAdminServiceRequestsQueryError = HTTPValidationError
+
+
+/**
+ * @summary List Admin Service Requests
+ */
+
+export function useListAdminServiceRequests<TData = Awaited<ReturnType<typeof list_admin_service_requests>>, TError = HTTPValidationError>(
+ params?: ListAdminServiceRequestsParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof list_admin_service_requests>>, TError, TData>, request?: SecondParameter<typeof apiClient>}
+  
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getListAdminServiceRequestsQueryOptions(params,options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  query.queryKey = queryOptions.queryKey ;
+
+  return query;
+}
+
+
+
+
+/**
+ * @summary Admin Change Service Request Status
+ */
+export const admin_change_service_request_status = (
+    requestId: string,
+    serviceRequestStatusUpdate: ServiceRequestStatusUpdate,
+ options?: SecondParameter<typeof apiClient>,signal?: AbortSignal
+) => {
+      
+      
+      return apiClient<ServiceRequestAdminRead>(
+      {url: `/api/v1/admin/service-requests/${requestId}/change-status`, method: 'POST',
+      headers: {'Content-Type': 'application/json', },
+      data: serviceRequestStatusUpdate, signal
+    },
+      options);
+    }
+  
+
+
+export const getAdminChangeServiceRequestStatusMutationOptions = <TError = HTTPValidationError,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof admin_change_service_request_status>>, TError,{requestId: string;data: ServiceRequestStatusUpdate}, TContext>, request?: SecondParameter<typeof apiClient>}
+): UseMutationOptions<Awaited<ReturnType<typeof admin_change_service_request_status>>, TError,{requestId: string;data: ServiceRequestStatusUpdate}, TContext> => {
+
+const mutationKey = ['adminChangeServiceRequestStatus'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+      
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof admin_change_service_request_status>>, {requestId: string;data: ServiceRequestStatusUpdate}> = (props) => {
+          const {requestId,data} = props ?? {};
+
+          return  admin_change_service_request_status(requestId,data,requestOptions)
+        }
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type AdminChangeServiceRequestStatusMutationResult = NonNullable<Awaited<ReturnType<typeof admin_change_service_request_status>>>
+    export type AdminChangeServiceRequestStatusMutationBody = ServiceRequestStatusUpdate
+    export type AdminChangeServiceRequestStatusMutationError = HTTPValidationError
+
+    /**
+ * @summary Admin Change Service Request Status
+ */
+export const useAdminChangeServiceRequestStatus = <TError = HTTPValidationError,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof admin_change_service_request_status>>, TError,{requestId: string;data: ServiceRequestStatusUpdate}, TContext>, request?: SecondParameter<typeof apiClient>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof admin_change_service_request_status>>,
+        TError,
+        {requestId: string;data: ServiceRequestStatusUpdate},
+        TContext
+      > => {
+
+      const mutationOptions = getAdminChangeServiceRequestStatusMutationOptions(options);
+
+      return useMutation(mutationOptions);
+    }
+    /**
+ * @summary Admin Hide Service Request
+ */
+export const admin_hide_service_request = (
+    requestId: string,
+ options?: SecondParameter<typeof apiClient>,signal?: AbortSignal
+) => {
+      
+      
+      return apiClient<ServiceRequestAdminRead>(
+      {url: `/api/v1/admin/service-requests/${requestId}/hide`, method: 'POST', signal
+    },
+      options);
+    }
+  
+
+
+export const getAdminHideServiceRequestMutationOptions = <TError = HTTPValidationError,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof admin_hide_service_request>>, TError,{requestId: string}, TContext>, request?: SecondParameter<typeof apiClient>}
+): UseMutationOptions<Awaited<ReturnType<typeof admin_hide_service_request>>, TError,{requestId: string}, TContext> => {
+
+const mutationKey = ['adminHideServiceRequest'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+      
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof admin_hide_service_request>>, {requestId: string}> = (props) => {
+          const {requestId} = props ?? {};
+
+          return  admin_hide_service_request(requestId,requestOptions)
+        }
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type AdminHideServiceRequestMutationResult = NonNullable<Awaited<ReturnType<typeof admin_hide_service_request>>>
+    
+    export type AdminHideServiceRequestMutationError = HTTPValidationError
+
+    /**
+ * @summary Admin Hide Service Request
+ */
+export const useAdminHideServiceRequest = <TError = HTTPValidationError,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof admin_hide_service_request>>, TError,{requestId: string}, TContext>, request?: SecondParameter<typeof apiClient>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof admin_hide_service_request>>,
+        TError,
+        {requestId: string},
+        TContext
+      > => {
+
+      const mutationOptions = getAdminHideServiceRequestMutationOptions(options);
 
       return useMutation(mutationOptions);
     }

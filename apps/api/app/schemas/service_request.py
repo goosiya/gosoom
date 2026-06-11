@@ -54,6 +54,12 @@ class ServiceRequestStatusUpdate(CamelModel):
     action: Literal["cancel", "complete"]
 
 
+class ServiceRequestAdminRead(ServiceRequestRead):
+    """관리자 전용 서비스 요청 응답 — deleted_at 포함 (Story 6.4)."""
+
+    deleted_at: datetime | None = None
+
+
 class ServiceRequestSummary(CamelModel):
     """견적 목록에서 대상 요청 요약 정보 (Story 3.4)."""
 

@@ -93,6 +93,28 @@ class ServiceRequestRepository:
         )
         return result.scalar_one_or_none()
 
+    async def list_all(
+        self,
+        after_id: uuid.UUID | None,
+        limit: int,
+        include_hidden: bool = False,
+    ) -> list[ServiceRequest]:
+        """전체 서비스 요청 조회 (관리자 전용). include_hidden=True이면 deleted_at 필터 제거."""
+        stmt = select(ServiceRequest)
+        if not include_hidden:
+            stmt = stmt.where(ServiceRequest.deleted_at.is_(None))
+        if after_id is not None:
+            stmt = stmt.where(ServiceRequest.id < after_id)
+        stmt = stmt.order_by(ServiceRequest.id.desc()).limit(limit)
+        return list((await self.session.execute(stmt)).scalars().all())
+
+    async def get_by_id_any(self, id: uuid.UUID) -> ServiceRequest | None:
+        """id로 요청 조회. deleted_at 무관 (관리자 상태변경·숨김 처리용)."""
+        result = await self.session.execute(
+            select(ServiceRequest).where(ServiceRequest.id == id)
+        )
+        return result.scalar_one_or_none()
+
     async def save(self, obj: ServiceRequest) -> ServiceRequest:
         """ORM 객체 변경사항을 flush/refresh하여 DB 반영. commit은 service 계층에서."""
         await self.session.flush()
