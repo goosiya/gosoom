@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useReducer, useRef, useState } from 'react';
 import {
   FlatList,
   KeyboardAvoidingView,
@@ -21,13 +21,31 @@ import {
 
 import { useAuth } from '@/features/auth';
 
+type MsgAction =
+  | { type: 'POLL'; items: MessageRead[] }
+  | { type: 'SENT'; msg: MessageRead };
+
+function messagesReducer(state: MessageRead[], action: MsgAction): MessageRead[] {
+  switch (action.type) {
+    case 'POLL': {
+      const existing = new Set(state.map((m) => m.id));
+      const fresh = action.items.filter((m) => !existing.has(m.id));
+      return fresh.length ? [...state, ...fresh] : state;
+    }
+    case 'SENT':
+      return state.some((m) => m.id === action.msg.id) ? state : [...state, action.msg];
+    default:
+      return state;
+  }
+}
+
 export default function ChatRoomScreen() {
   const rawId = useLocalSearchParams<{ id: string | string[] }>().id;
   const chatRoomId = Array.isArray(rawId) ? rawId[0] : rawId;
   const { user } = useAuth();
 
   const lastIdRef = useRef<string | undefined>(undefined);
-  const [allMessages, setAllMessages] = useState<MessageRead[]>([]);
+  const [allMessages, dispatchMsg] = useReducer(messagesReducer, []);
   const [content, setContent] = useState('');
   const [sendError, setSendError] = useState<string | null>(null);
   const flatListRef = useRef<FlatList<MessageRead>>(null);
@@ -41,12 +59,7 @@ export default function ChatRoomScreen() {
 
   useEffect(() => {
     if (!pollData?.items?.length) return;
-    setAllMessages((prev) => {
-      const existingIds = new Set(prev.map((m) => m.id));
-      const newMsgs = pollData.items.filter((m) => !existingIds.has(m.id));
-      if (!newMsgs.length) return prev;
-      return [...prev, ...newMsgs];
-    });
+    dispatchMsg({ type: 'POLL', items: pollData.items });
     const lastItem = pollData.items[pollData.items.length - 1];
     if (lastItem?.id && (!lastIdRef.current || lastItem.id > lastIdRef.current)) {
       lastIdRef.current = lastItem.id;
@@ -62,10 +75,7 @@ export default function ChatRoomScreen() {
   const sendMutation = useSendMessage<Error>({
     mutation: {
       onSuccess: (newMsg) => {
-        setAllMessages((prev) => {
-          if (prev.some((m) => m.id === newMsg.id)) return prev;
-          return [...prev, newMsg];
-        });
+        dispatchMsg({ type: 'SENT', msg: newMsg });
         if (!lastIdRef.current || newMsg.id > lastIdRef.current) {
           lastIdRef.current = newMsg.id;
         }
