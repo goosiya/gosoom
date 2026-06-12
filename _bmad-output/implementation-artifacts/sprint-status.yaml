@@ -35,7 +35,7 @@
 # - Dev moves story to 'review', then runs code-review (fresh context, different LLM recommended)
 
 generated: 2026-06-08
-last_updated: 2026-06-12 (Epic 6 in-progress, 6-1 done, 6-2 done, 6-3 done, 6-4 done, 6-5 done, 6-6 done)
+last_updated: 2026-06-12 (Epic 6 done(6-1~6-6 done, 회고 skip); Epic 7 Post-MVP UX 추가 — 7-1 랜딩·7-2 브랜드 리네이밍 done, ad-hoc 사후 기록)
 project: gosoom
 project_key: NOKEY
 tracking_system: file-system
@@ -87,7 +87,7 @@ development_status:
   epic-5-retrospective: optional
 
   # Epic 6: 관리자 콘솔 (FR19-24)
-  epic-6: in-progress
+  epic-6: done
   6-1-admin-console-shell-login: done
   6-2-customer-pro-account-management: done
   6-3-admin-account-management: done
@@ -95,3 +95,10 @@ development_status:
   6-5-chat-history-readonly: done
   6-6-category-management: done
   epic-6-retrospective: optional
+
+  # Epic 7: 공개 랜딩 & 브랜드 표기 (Post-MVP UX, 신규 FR 없음)
+  # ⚠️ 정식 create-story→dev-story 절차 없이 KTH 요청으로 직접 구현 후 사후 기록(ad-hoc).
+  epic-7: done
+  7-1-public-landing-page: done
+  7-2-brand-rename-meetgo: done
+  epic-7-retrospective: optional

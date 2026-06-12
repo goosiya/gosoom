@@ -2,7 +2,7 @@ import '../global.css';
 
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { setStorageBackend } from '@gosoom/api-client';
-import { Slot, useRouter, useSegments } from 'expo-router';
+import { Slot, usePathname, useRouter, useSegments } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import React, { useEffect, useRef, useState } from 'react';
 
@@ -27,6 +27,7 @@ function AuthGate({ children }: { children: React.ReactNode }) {
   const { user, isLoading } = useAuth();
   const router = useRouter();
   const segments = useSegments();
+  const pathname = usePathname();
   const splashHiddenRef = useRef(false);
 
   useEffect(() => {
@@ -39,15 +40,17 @@ function AuthGate({ children }: { children: React.ReactNode }) {
     }
 
     const inAuthGroup = segments[0] === '(auth)';
+    // 루트 index 라우트(`/`) = 공개 랜딩 화면.
+    const isLanding = pathname === '/';
 
     if (!user) {
-      // 미인증 → 로그인 화면으로
-      if (!inAuthGroup) {
-        router.replace('/(auth)/login');
+      // 미인증 → 랜딩·인증 화면은 허용, 그 외 보호 화면은 랜딩으로
+      if (!inAuthGroup && !isLanding) {
+        router.replace('/');
       }
     } else {
-      // 인증됨 → 역할별 그룹으로 (AC6)
-      if (inAuthGroup) {
+      // 인증됨 → 랜딩·인증 화면에 있으면 역할별 그룹으로 (AC6)
+      if (inAuthGroup || isLanding) {
         if (user.role === 'customer') {
           router.replace('/(customer)/requests');
         } else {
@@ -55,7 +58,7 @@ function AuthGate({ children }: { children: React.ReactNode }) {
         }
       }
     }
-  }, [user, isLoading, segments, router]);
+  }, [user, isLoading, segments, pathname, router]);
 
   if (isLoading) return null;
   return <>{children}</>;

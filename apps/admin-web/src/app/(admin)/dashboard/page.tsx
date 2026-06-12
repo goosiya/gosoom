@@ -35,7 +35,7 @@ export default function DashboardPage() {
     <main className="max-w-screen-xl mx-auto p-6">
       <div className="mb-8">
         <h1 className="text-2xl font-bold tracking-tight">관리자 콘솔에 오신 것을 환영합니다</h1>
-        <p className="text-muted-foreground mt-1">gosoom 서비스 운영 및 관리 기능을 제공합니다.</p>
+        <p className="text-muted-foreground mt-1">meetgo 서비스 운영 및 관리 기능을 제공합니다.</p>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">

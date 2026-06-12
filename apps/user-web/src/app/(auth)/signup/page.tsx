@@ -42,7 +42,7 @@ export default function SignupPage() {
       <Card className="w-full max-w-sm shadow-sm">
         <CardHeader className="space-y-1 pb-4">
           <div className="text-center mb-2">
-            <span className="text-2xl font-bold text-primary tracking-tight">gosoom</span>
+            <span className="text-2xl font-bold text-primary tracking-tight">meetgo</span>
           </div>
           <CardTitle className="text-xl text-center">회원가입</CardTitle>
         </CardHeader>
