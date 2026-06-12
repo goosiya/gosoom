@@ -4,7 +4,7 @@
 - `get_db`: FastAPI `Depends`용 세션 의존성.
 - `Base`: 모든 모델의 선언적 베이스. Alembic env.py가 `Base.metadata`를 target으로 참조.
 
-이식성(NFR6): Phase1(Supabase)→Phase2(Railway) 이관은 `DATABASE_URL`만 변경.
+이식성(NFR6): DB 호스팅(Railway 등) 이관/교체는 `DATABASE_URL` 한 곳만 변경하면 된다.
 """
 
 from collections.abc import AsyncIterator

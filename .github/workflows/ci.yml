@@ -25,9 +25,9 @@ jobs:
       DATABASE_URL: postgresql+asyncpg://postgres:postgres@localhost:5432/gosoom_test
       JWT_SECRET: ci-test-secret-not-for-prod
     services:
-      # Supabase PG17 정합 — 실 DB 제약(이메일 unique 등)을 CI에서 그대로 검증
+      # 운영(Railway) PG18 정합 — 실 DB 제약(이메일 unique 등)을 CI에서 그대로 검증
       postgres:
-        image: postgres:17
+        image: postgres:18
         env:
           POSTGRES_USER: postgres
           POSTGRES_PASSWORD: postgres
