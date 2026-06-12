@@ -15,7 +15,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "gosoom",
+  title: "meetgo",
   description: "고객·고수 서비스 매칭 플랫폼",
 };
 

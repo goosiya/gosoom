@@ -18,7 +18,7 @@ function CustomerGuard({ children }: { children: ReactNode }) {
     if (me.isError) {
       router.replace("/login");
     } else if (me.data && me.data.userRole !== "customer") {
-      router.replace("/");
+      router.replace("/dashboard");
     }
   }, [me.isError, me.data, router]);
 

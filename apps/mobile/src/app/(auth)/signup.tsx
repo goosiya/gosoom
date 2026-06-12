@@ -57,7 +57,7 @@ export default function SignupScreen() {
           contentContainerStyle={styles.container}
           keyboardShouldPersistTaps="handled">
           <View style={styles.card}>
-            <Text style={styles.brand}>gosoom</Text>
+            <Text style={styles.brand}>meetgo</Text>
             <Text style={styles.title}>회원가입</Text>
 
             {/* 역할 선택 */}

@@ -14,8 +14,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "gosoom 관리자",
-  description: "gosoom 관리자 콘솔",
+  title: "meetgo 관리자",
+  description: "meetgo 관리자 콘솔",
 };
 
 export default function RootLayout({

@@ -37,7 +37,7 @@ function LoginForm() {
     <Card className="w-full max-w-sm shadow-sm">
       <CardHeader className="space-y-1 pb-4">
         <div className="text-center mb-2">
-          <span className="text-2xl font-bold text-primary tracking-tight">gosoom 관리자</span>
+          <span className="text-2xl font-bold text-primary tracking-tight">meetgo 관리자</span>
         </div>
         <CardTitle className="text-xl text-center">관리자 로그인</CardTitle>
       </CardHeader>

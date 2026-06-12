@@ -37,7 +37,7 @@ export function AdminHeader() {
     return (
       <header className="sticky top-0 z-50 w-full border-b border-border bg-background/95">
         <div className="flex h-14 max-w-screen-xl mx-auto items-center px-4">
-          <span className="font-bold text-xl text-primary tracking-tight">gosoom 관리자</span>
+          <span className="font-bold text-xl text-primary tracking-tight">meetgo 관리자</span>
           <div className="flex-1" />
           <Button variant="ghost" size="sm" onClick={handleLogout}>로그아웃</Button>
         </div>
@@ -56,7 +56,7 @@ export function AdminHeader() {
     <header className="sticky top-0 z-50 w-full border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="flex h-14 max-w-screen-xl mx-auto items-center px-4 gap-6">
         <Link href="/dashboard" className="font-bold text-xl text-primary tracking-tight whitespace-nowrap">
-          gosoom 관리자
+          meetgo 관리자
         </Link>
 
         <Separator orientation="vertical" className="h-5" />
