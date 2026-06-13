@@ -56,7 +56,7 @@ function LoginForm() {
               autoComplete="username"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              placeholder="admin@gosoom.com"
+              placeholder="admin@meetgo.com"
               disabled={login.isPending}
             />
           </div>

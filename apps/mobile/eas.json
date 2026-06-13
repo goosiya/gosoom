@@ -17,7 +17,7 @@
         "buildType": "apk"
       },
       "env": {
-        "EXPO_PUBLIC_API_URL": "https://REPLACE_WITH_RAILWAY_API_DOMAIN/api/v1"
+        "EXPO_PUBLIC_API_URL": "https://api-production-abb4.up.railway.app/api/v1"
       }
     },
     "production": {
