@@ -4,7 +4,12 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
-import { useSignup, type SignupRequestRole } from "@gosoom/api-client";
+import {
+  PASSWORD_RULE_HINT,
+  useSignup,
+  validatePassword,
+  type SignupRequestRole,
+} from "@gosoom/api-client";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -17,6 +22,8 @@ export default function SignupPage() {
   const [password, setPassword] = useState("");
   const [displayName, setDisplayName] = useState("");
   const [role, setRole] = useState<SignupRequestRole>("customer");
+  // 클라이언트 측 비밀번호 규칙 위반 메시지(서버 일반 422 메시지 대신 규칙 안내).
+  const [passwordError, setPasswordError] = useState("");
 
   const signup = useSignup<Error>({
     mutation: {
@@ -34,6 +41,13 @@ export default function SignupPage() {
 
   const handleSubmit = () => {
     if (!canSubmit) return;
+    // 제출 전 비밀번호 규칙 검증 — 위반 시 어떤 규칙이 어긋났는지 안내하고 요청 중단.
+    const pwError = validatePassword(password);
+    if (pwError) {
+      setPasswordError(pwError);
+      return;
+    }
+    setPasswordError("");
     signup.mutate({ data: { email, password, displayName, role } });
   };
 
@@ -87,10 +101,19 @@ export default function SignupPage() {
                 type="password"
                 autoComplete="new-password"
                 value={password}
-                onChange={(e) => setPassword(e.target.value)}
+                onChange={(e) => {
+                  setPassword(e.target.value);
+                  if (passwordError) setPasswordError("");
+                }}
                 placeholder="8자 이상"
                 disabled={signup.isPending}
               />
+              <p className="text-xs text-muted-foreground">{PASSWORD_RULE_HINT}</p>
+              {passwordError && (
+                <p className="text-sm text-destructive" role="alert">
+                  {passwordError}
+                </p>
+              )}
             </div>
 
             {/* 역할 선택 */}

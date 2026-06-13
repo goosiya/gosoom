@@ -12,6 +12,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import { PASSWORD_RULE_HINT, validatePassword } from '@gosoom/api-client';
 import { tokens } from '@gosoom/ui';
 
 import { useAuth } from '@/features/auth';
@@ -36,6 +37,12 @@ export default function SignupScreen() {
 
   const handleSignup = async () => {
     if (!canSubmit) return;
+    // 제출 전 비밀번호 규칙 검증 — 위반 시 어떤 규칙이 어긋났는지 안내하고 요청 중단.
+    const pwError = validatePassword(password);
+    if (pwError) {
+      setErrorMessage(pwError);
+      return;
+    }
     setErrorMessage('');
     setIsPending(true);
     try {
@@ -128,6 +135,7 @@ export default function SignupScreen() {
                 editable={!isPending}
                 onSubmitEditing={handleSignup}
               />
+              <Text style={styles.hint}>{PASSWORD_RULE_HINT}</Text>
             </View>
 
             {errorMessage ? (
@@ -220,6 +228,10 @@ const styles = StyleSheet.create({
     fontSize: tokens.fontSize.base,
     color: tokens.colors.text,
     backgroundColor: tokens.colors.background,
+  },
+  hint: {
+    fontSize: tokens.fontSize.sm,
+    color: tokens.colors.textSecondary,
   },
   error: {
     fontSize: tokens.fontSize.sm,
